@@ -31,3 +31,33 @@ google-services.json
 
 # Android Profiling
 *.hprof
+
+# Unity-specific
+/Library/
+/Temp/
+/Obj/
+/Build/
+/Builds/
+/Logs/
+/UserSettings/
+
+# Visual Studio / Rider
+*.csproj
+*.sln
+*.userprefs
+*.unityproj
+*.pidb
+*.booproj
+*.svd
+*.pdb
+*.opendb
+*.VC.db
+
+# macOS specific
+.DS_Store
+
+# VS Code
+.vscode/
+
+# Thumbnails
+Thumbs.db
