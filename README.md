@@ -3,6 +3,7 @@
 Used Git LFS to track large files in Assets
 
 To install go to Git LFS website or use `brew install git-lfs`
+
 Detailed installation instruction: https://docs.github.com/en/repositories/working-with-files/managing-large-files/installing-git-large-file-storage
 
 To check currently tracked files: `git lfs track`
