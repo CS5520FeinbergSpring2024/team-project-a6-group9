@@ -4,16 +4,22 @@ using UnityEngine;
 
 public class NodeController : MonoBehaviour
 {
+    public AudioClip dragSound;
+    public AudioClip dropSound;
+    private AudioSource audioSource;
     private GameObject[] allNodes;
     private GameObject selectedNode;
-    private Vector2 originalPosition;
+    private Vector3 originalPosition;
     private float swapThreshold = 1.0f;
     private bool isDragging = false;
     private Vector3[] snapPositions; 
+    private Vector3 originalScale;
+
 
     void Start()
     {
         allNodes = GameObject.FindGameObjectsWithTag("Node");
+        audioSource = GetComponent<AudioSource>();
         
         snapPositions = new Vector3[allNodes.Length];
         float screenWidth = Camera.main.orthographicSize * 2.0f * Screen.width / Screen.height;
@@ -35,27 +41,36 @@ public class NodeController : MonoBehaviour
     {
         if (Input.GetMouseButtonDown(0))
         {
-            Vector2 mousePosition = Camera.main.ScreenToWorldPoint(Input.mousePosition);
-            RaycastHit2D hit = Physics2D.Raycast(mousePosition, Vector2.zero);
+            Vector3 mousePosition = Camera.main.ScreenToWorldPoint(Input.mousePosition);
+            RaycastHit2D hit = Physics2D.Raycast(mousePosition, Vector3.zero);
 
             if (hit.collider != null && hit.collider.gameObject.CompareTag("Node"))
             {
                 selectedNode = hit.collider.gameObject;
                 originalPosition = selectedNode.transform.position;
+                originalScale = selectedNode.transform.localScale;
                 isDragging = true;
+                
+                audioSource.PlayOneShot(dragSound);
+
+                selectedNode.transform.localScale = originalScale * 1.1f;
+                selectedNode.transform.position = new Vector3(selectedNode.transform.position.x, selectedNode.transform.position.y, selectedNode.transform.position.z - 0.5f); 
             }
         }
 
         if (selectedNode != null && isDragging)
         {
-            Vector2 mousePosition = Camera.main.ScreenToWorldPoint(Input.mousePosition);
+            Vector3 mousePosition = Camera.main.ScreenToWorldPoint(Input.mousePosition);
             selectedNode.transform.position = new Vector3(mousePosition.x, selectedNode.transform.position.y, selectedNode.transform.position.z);
         }
 
         if (Input.GetMouseButtonUp(0) && selectedNode != null)
         {
             isDragging = false;
+            selectedNode.transform.localScale = originalScale;
+            selectedNode.transform.position = new Vector3(selectedNode.transform.position.x, selectedNode.transform.position.y, originalPosition.z);
             HandleDrop();
+            audioSource.PlayOneShot(dropSound);
             selectedNode = null;
         }
     }
@@ -63,8 +78,8 @@ public class NodeController : MonoBehaviour
 
     void OnMouseDown()
     {
-        Vector2 mousePosition = Camera.main.ScreenToWorldPoint(Input.mousePosition);
-        RaycastHit2D hit = Physics2D.Raycast(mousePosition, Vector2.zero);
+        Vector3 mousePosition = Camera.main.ScreenToWorldPoint(Input.mousePosition);
+        RaycastHit2D hit = Physics2D.Raycast(mousePosition, Vector3.zero);
 
         if (hit.collider != null && hit.collider.gameObject.CompareTag("Node"))
         {
@@ -110,7 +125,7 @@ public class NodeController : MonoBehaviour
 
             float distance = Mathf.Abs(node.transform.position.x - selectedNode.transform.position.x);
 
-            if (distance < closestDistance && Mathf.Abs(node.transform.position.y - selectedNode.transform.position.y) < 0.1f) // Ensure they are roughly at the same y-level
+            if (distance < closestDistance && Mathf.Abs(node.transform.position.y - selectedNode.transform.position.y) < 0.1f) 
             {
                 closestDistance = distance;
                 closestNode = node;
