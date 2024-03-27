@@ -22,7 +22,6 @@ public class NodeController : MonoBehaviour
     void Start() {
         audioSource = GetComponentInChildren<AudioSource>();
 
-        numNodes = 5;
         allNodes = new GameObject[numNodes];
         snapPositions = new Vector3[allNodes.Length];
 
