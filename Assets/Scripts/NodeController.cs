@@ -28,8 +28,10 @@ public class NodeController : MonoBehaviour
         float screenWidth = Camera.main.orthographicSize * 2.0f * Screen.width / Screen.height;
         float spacing = screenWidth / (allNodes.Length + 1);
 
+        Vector3 center = new Vector3(-893, 500, 0);
+
         for (int i = 0; i < allNodes.Length; i++) {
-            GameObject node = Instantiate(nodePrefab, new Vector3(0, -50, 0), Quaternion.identity, this.transform);
+            GameObject node = Instantiate(nodePrefab, center, Quaternion.identity, this.transform);
             node.tag = "Node";
             allNodes[i] = node;
 
@@ -39,7 +41,7 @@ public class NodeController : MonoBehaviour
                 textComponent.text = randomNumber.ToString();
             }
 
-            snapPositions[i] = new Vector3((i + 1) * spacing - (screenWidth / 2), -50, 0);
+            snapPositions[i] = new Vector3((i + 1) * spacing - (screenWidth / 2) + center.x, center.y, center.z);
             StartCoroutine(MoveToPosition(node.transform, snapPositions[i], 1.0f));
         }
     }
