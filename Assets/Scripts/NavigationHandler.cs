@@ -24,8 +24,10 @@ public class NavigationHandler : MonoBehaviour
     public AudioSource backgroundMusic;
     public AudioSource uiAudioSource;
     public AudioClip buttonSound;
+    public AudioClip errorSound;
     public AudioClip shopMusicClip;
     private AudioClip mainMusicClip;
+    private bool playButtonSound = true;
     
     
 
@@ -50,7 +52,7 @@ public class NavigationHandler : MonoBehaviour
 
     public void PlayButtonSound()
     {
-        if (uiAudioSource != null && buttonSound != null)
+        if (playButtonSound && uiAudioSource != null && buttonSound != null)
         {
             uiAudioSource.PlayOneShot(buttonSound);
         }
@@ -284,6 +286,11 @@ public class NavigationHandler : MonoBehaviour
 
     IEnumerator ShakeGameObject(GameObject obj, float duration, float magnitude)
     {
+        playButtonSound = false;
+        if (uiAudioSource != null && errorSound != null)
+        {
+            uiAudioSource.PlayOneShot(errorSound);
+        }
         Vector3 originalPosition = obj.transform.localPosition;
         float elapsed = 0.0f;
 
@@ -299,6 +306,7 @@ public class NavigationHandler : MonoBehaviour
         }
 
         obj.transform.localPosition = originalPosition;
+        playButtonSound = true;
     }
 
 }
