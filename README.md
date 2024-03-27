@@ -3,6 +3,8 @@
 ## Install Git LFS first!!!
 To install, use homebrew `brew install git-lfs`
 
+For the first time, init lfs globally, `git lfs install`
+
 To check currently tracked files: `git lfs track`
 
 To add new file type to lfs track: `git lfs track *.file_extension_you_want_to_track`
