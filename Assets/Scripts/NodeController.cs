@@ -27,11 +27,11 @@ public class NodeController : MonoBehaviour
 
         for (int i = 0; i < snapPositions.Length; i++)
         {
-            snapPositions[i] = new Vector3((i + 1) * spacing - (screenWidth / 2), 0, 0);
+            snapPositions[i] = new Vector3((i + 1) * spacing - (screenWidth / 2), -50, 0);
             
             if (i < allNodes.Length)
             {
-                allNodes[i].transform.position = new Vector3(snapPositions[i].x, 0, 0) - new Vector3(screenWidth, 0, 0);
+                allNodes[i].transform.position = new Vector3(snapPositions[i].x, -50, 0) - new Vector3(screenWidth, 0, 0);
                 StartCoroutine(MoveToPosition(allNodes[i].transform, snapPositions[i], 1.0f));
             }
         }
