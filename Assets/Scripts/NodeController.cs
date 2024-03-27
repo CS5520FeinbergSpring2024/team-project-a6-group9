@@ -1,39 +1,47 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using TMPro;
 
 public class NodeController : MonoBehaviour
 {
     public AudioClip dragSound;
     public AudioClip dropSound;
+    public GameObject nodePrefab;
+    public int numNodes;
     private AudioSource audioSource;
     private GameObject[] allNodes;
     private GameObject selectedNode;
     private Vector3 originalPosition;
     private float swapThreshold = 1.0f;
     private bool isDragging = false;
-    private Vector3[] snapPositions; 
+    private Vector3[] snapPositions;
     private Vector3 originalScale;
 
 
-    void Start()
-    {
-        allNodes = GameObject.FindGameObjectsWithTag("Node");
-        audioSource = GetComponent<AudioSource>();
-        
-        snapPositions = new Vector3[allNodes.Length];
-        float screenWidth = Camera.main.orthographicSize * 2.0f * Screen.width / Screen.height;
-        float spacing = screenWidth / (snapPositions.Length + 1);
+    void Start() {
+        audioSource = GetComponentInChildren<AudioSource>();
 
-        for (int i = 0; i < snapPositions.Length; i++)
-        {
-            snapPositions[i] = new Vector3((i + 1) * spacing - (screenWidth / 2), -50, 0);
-            
-            if (i < allNodes.Length)
-            {
-                allNodes[i].transform.position = new Vector3(snapPositions[i].x, -50, 0) - new Vector3(screenWidth, 0, 0);
-                StartCoroutine(MoveToPosition(allNodes[i].transform, snapPositions[i], 1.0f));
+        numNodes = 5;
+        allNodes = new GameObject[numNodes];
+        snapPositions = new Vector3[allNodes.Length];
+
+        float screenWidth = Camera.main.orthographicSize * 2.0f * Screen.width / Screen.height;
+        float spacing = screenWidth / (allNodes.Length + 1);
+
+        for (int i = 0; i < allNodes.Length; i++) {
+            GameObject node = Instantiate(nodePrefab, new Vector3(0, -50, 0), Quaternion.identity, this.transform);
+            node.tag = "Node";
+            allNodes[i] = node;
+
+            int randomNumber = Random.Range(1, 100);
+            TextMeshPro textComponent = node.GetComponentInChildren<TextMeshPro>();
+            if (textComponent != null) {
+                textComponent.text = randomNumber.ToString();
             }
+
+            snapPositions[i] = new Vector3((i + 1) * spacing - (screenWidth / 2), -50, 0);
+            StartCoroutine(MoveToPosition(node.transform, snapPositions[i], 1.0f));
         }
     }
 
