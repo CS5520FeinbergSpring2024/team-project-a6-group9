@@ -13,6 +13,7 @@ public class NodeController : MonoBehaviour
     private GameObject[] allNodes;
     private GameObject selectedNode;
     private Vector3[] snapPositions;
+    private bool isSwapping = false;
 
 
     void Start() {
@@ -25,25 +26,30 @@ public class NodeController : MonoBehaviour
         float spacing = screenWidth / (allNodes.Length + 1);
 
         Vector3 center = new Vector3(-893, 500, 0);
+        Vector3 scale = new Vector3(15,16,1);
 
-        for (int i = 0; i < allNodes.Length; i++) {
-            GameObject node = Instantiate(nodePrefab, center, Quaternion.identity, this.transform);
-            node.tag = "Node";
-            allNodes[i] = node;
+    for (int i = 0; i < allNodes.Length; i++) {
+        Vector3 snapPosition = new Vector3((i + 1) * spacing - (screenWidth / 2)+center.x, center.y, center.z);
+        snapPositions[i] = snapPosition;
 
-            int randomNumber = Random.Range(1, 100);
-            TextMeshPro textComponent = node.GetComponentInChildren<TextMeshPro>();
-            if (textComponent != null) {
-                textComponent.text = randomNumber.ToString();
-            }
+        GameObject node = Instantiate(nodePrefab, snapPosition, Quaternion.identity, this.transform);
+        node.tag = "Node";
+        node.transform.localScale = Vector3.zero;
+        allNodes[i] = node;
 
-            snapPositions[i] = new Vector3((i + 1) * spacing - (screenWidth / 2) + center.x, center.y, center.z);
-            StartCoroutine(MoveToPosition(node.transform, snapPositions[i], 1.0f));
+        StartCoroutine(ScaleNodeToSize(node.transform, scale, 0.5f));
+
+        int randomNumber = Random.Range(1, 100);
+        TextMeshPro textComponent = node.GetComponentInChildren<TextMeshPro>();
+        if (textComponent != null) {
+            textComponent.text = randomNumber.ToString();
         }
+    }
     }
 
     void Update()
     {
+        if (isSwapping) return;
         if (Input.GetMouseButtonDown(0))
         {
             Vector3 mousePosition = Camera.main.ScreenToWorldPoint(Input.mousePosition);
@@ -62,6 +68,7 @@ public class NodeController : MonoBehaviour
             selectedNode.transform.localScale *= 1.2f; 
         } else {
             if (node != selectedNode) {
+                isSwapping = true;
                 StartCoroutine(SwapPositions(selectedNode, node));
             } else {
                 selectedNode.transform.localScale /= 1.2f;
@@ -83,6 +90,8 @@ public class NodeController : MonoBehaviour
             selectedNode.transform.localScale /= 1.2f;
             selectedNode = null;
         }
+
+        isSwapping = false; 
     }
 
     IEnumerator MoveToPosition(Transform objectTransform, Vector3 position, float duration) {
@@ -98,4 +107,16 @@ public class NodeController : MonoBehaviour
         objectTransform.position = position;
     }
 
+    IEnumerator ScaleNodeToSize(Transform nodeTransform, Vector3 targetScale, float duration) {
+        float elapsedTime = 0;
+        Vector3 startingScale = nodeTransform.localScale;
+
+        while (elapsedTime < duration) {
+            nodeTransform.localScale = Vector3.Lerp(startingScale, targetScale, elapsedTime / duration);
+            elapsedTime += Time.deltaTime;
+            yield return null;
+        }
+
+        nodeTransform.localScale = targetScale;
+    }
 }
