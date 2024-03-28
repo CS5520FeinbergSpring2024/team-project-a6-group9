@@ -3,16 +3,11 @@ using System.Collections.Generic;
 using UnityEngine;
 using TMPro;
 
-public class PseudocodeDisplay : MonoBehaviour
+public class PseudocodePrinting : MonoBehaviour
 {
     public TextMeshProUGUI pseudocodeText;
+    public string[] pseudocodeLines;
     public float characterDisplayDelay = 0.02f;
-    private string[] pseudocodeLines = {
-        "For each <color=#ffaabb>element</color>",
-        "    <color=#11ffee>next</color> = next element",
-        "    If  (<color=#ffaabb>element</color> > <color=#11ffee>next</color>)",
-        "        swap(<color=#ffaabb>element</color>, <color=#11ffee>next</color>)"
-    };
 
     void Start()
     {

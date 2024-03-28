@@ -12,10 +12,7 @@ public class NodeController : MonoBehaviour
     private AudioSource audioSource;
     private GameObject[] allNodes;
     private GameObject selectedNode;
-    private Vector3 originalPosition;
-    private float swapThreshold = 1.0f;
     private Vector3[] snapPositions;
-    private Vector3 originalScale;
 
 
     void Start() {
