@@ -5,7 +5,6 @@ using TMPro;
 
 public class NodeController : MonoBehaviour
 {
-    // game effects and UI variables - do not modify
     public AudioClip dragSound;
     public AudioClip incorrectSound;
     public AudioClip correctSound;
@@ -25,6 +24,7 @@ public class NodeController : MonoBehaviour
     public GameObject StarFilled1;
     public GameObject StarFilled2;
     public GameObject StarFilled3;
+    public ISwapValidator swapValidator;
 
     private GameObject[] allNodes;
     private GameObject selectedNode;
@@ -32,15 +32,22 @@ public class NodeController : MonoBehaviour
     private bool isSwapping = false;
     private int playerCoin;
 
-    // sort specific variable
-    private int sortedBoundary;
-
 
     void Start() {
         audioSource = GetComponentInChildren<AudioSource>();
         livesText.text = $"{numLives}";
-        
-        sortedBoundary = numNodes;
+
+        swapValidator = GetComponent<ISwapValidator>();
+
+        if (swapValidator == null) {
+            swapValidator = FindObjectOfType(typeof(ISwapValidator)) as ISwapValidator;
+        }
+
+        if (swapValidator == null) {
+            Debug.LogError("No swap validator found in the scene!");
+            return;
+        }
+
         allNodes = new GameObject[numNodes];
         snapPositions = new Vector3[allNodes.Length];
 
@@ -103,16 +110,6 @@ public class NodeController : MonoBehaviour
         return true;
     }
 
-    // all sorting algorithm check goes here
-    private bool IsValidSwap(int index1, int index2) {
-        if (index1 == index2 - 1) {
-            return int.Parse(allNodes[index1].GetComponentInChildren<TextMeshPro>().text) >
-                int.Parse(allNodes[index2].GetComponentInChildren<TextMeshPro>().text);
-        }
-
-        return false;
-    }
-
     private void HandleNodeSelection(GameObject node) {
         if (selectedNode == null) {
             selectedNode = node;
@@ -171,7 +168,7 @@ public class NodeController : MonoBehaviour
         int node1Index = System.Array.IndexOf(allNodes, node1);
         int node2Index = System.Array.IndexOf(allNodes, node2);
 
-        if (!IsValidSwap(node1Index, node2Index)) {
+        if (!swapValidator.IsValidSwap(allNodes, node1Index, node2Index)) {
             numLives--;
             UpdateLives();
             audioSource.PlayOneShot(incorrectSound);
