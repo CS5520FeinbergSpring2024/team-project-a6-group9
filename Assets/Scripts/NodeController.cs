@@ -7,9 +7,15 @@ public class NodeController : MonoBehaviour
 {
     public AudioClip dragSound;
     public AudioClip dropSound;
+    public AudioSource backgroundAudioSource;
+    public AudioClip gameOverSound;
     public GameObject nodePrefab;
     public int numNodes;
-    private AudioSource audioSource;
+    public int numLives;
+    public TextMeshProUGUI livesText;
+    public GameObject wrongIndicator;
+    public GameObject gameOverDialog;
+
     private GameObject[] allNodes;
     private GameObject selectedNode;
     private Vector3[] snapPositions;
@@ -17,8 +23,9 @@ public class NodeController : MonoBehaviour
 
 
     void Start() {
-        audioSource = GetComponentInChildren<AudioSource>();
-
+        UpdateLives();
+        
+        wrongIndicator.gameObject.SetActive(false);
         allNodes = new GameObject[numNodes];
         snapPositions = new Vector3[allNodes.Length];
 
@@ -77,22 +84,63 @@ public class NodeController : MonoBehaviour
         }
     }
 
+private bool IsValidSwap(int index1, int index2) {
+    if (index1 == index2 - 1) {
+        return int.Parse(allNodes[index1].GetComponentInChildren<TextMeshPro>().text) >
+               int.Parse(allNodes[index2].GetComponentInChildren<TextMeshPro>().text);
+    }
+
+    return false;
+}
+
+
+    private void UpdateLives() {
+        livesText.text = $"{numLives}";
+    }
+
+    private void GameOver() {
+        Time.timeScale = 0;
+        backgroundAudioSource.Stop();
+        backgroundAudioSource.PlayOneShot(gameOverSound);
+        gameOverDialog.SetActive(true);
+    }
+
     IEnumerator SwapPositions(GameObject node1, GameObject node2) {
-        Vector3 position1 = node1.transform.position;
-        Vector3 position2 = node2.transform.position;
+        int node1Index = System.Array.IndexOf(allNodes, node1);
+        int node2Index = System.Array.IndexOf(allNodes, node2);
 
-        StartCoroutine(MoveToPosition(node1.transform, position2, 0.25f));
-        StartCoroutine(MoveToPosition(node2.transform, position1, 0.25f));
+        if (!IsValidSwap(node1Index, node2Index)) {
+            numLives--;
+            UpdateLives();
+            StartCoroutine(ShowIncorrectFeedback());
 
-        yield return new WaitForSeconds(0.25f);
+            if (numLives <= 0) {
+                GameOver();
+                yield break;
+            }
 
-        if (selectedNode != null) {
-            selectedNode.transform.localScale /= 1.2f;
-            selectedNode = null;
+            if (selectedNode != null) {
+                selectedNode.transform.localScale /= 1.2f;
+                selectedNode = null;
+            }
+        } else {
+            StartCoroutine(MoveToPosition(node1.transform, snapPositions[node2Index], 0.25f));
+            StartCoroutine(MoveToPosition(node2.transform, snapPositions[node1Index], 0.25f));
+
+            yield return new WaitForSeconds(0.25f);
+
+            allNodes[node1Index] = node2;
+            allNodes[node2Index] = node1;
+
+            if (selectedNode != null) {
+                selectedNode.transform.localScale /= 1.2f;
+                selectedNode = null;
+            }
         }
 
-        isSwapping = false; 
+        isSwapping = false;
     }
+
 
     IEnumerator MoveToPosition(Transform objectTransform, Vector3 position, float duration) {
         Vector3 startPosition = objectTransform.position;
@@ -119,4 +167,10 @@ public class NodeController : MonoBehaviour
 
         nodeTransform.localScale = targetScale;
     }
+
+    IEnumerator ShowIncorrectFeedback() {
+        wrongIndicator.gameObject.SetActive(true);
+        yield return new WaitForSeconds(1.0f);
+        wrongIndicator.gameObject.SetActive(false);
+}
 }
