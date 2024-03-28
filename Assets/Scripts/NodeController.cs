@@ -10,6 +10,7 @@ public class NodeController : MonoBehaviour
     public AudioClip incorrectSound;
     public AudioClip correctSound;
     public AudioClip gameOverSound;
+    public AudioClip winningSound;
     public AudioSource backgroundAudioSource;
     private AudioSource audioSource;
     public GameObject nodePrefab;
@@ -18,6 +19,10 @@ public class NodeController : MonoBehaviour
     public int numLives;
     public TextMeshProUGUI livesText;
     public GameObject gameOverDialog;
+    public GameObject winningDialog;
+    public GameObject StarFilled1;
+    public GameObject StarFilled2;
+    public GameObject StarFilled3;
 
     private GameObject[] allNodes;
     private GameObject selectedNode;
@@ -76,6 +81,16 @@ public class NodeController : MonoBehaviour
         }
     }
 
+    private bool IsArraySorted() {
+        for (int i = 0; i < allNodes.Length - 1; i++) {
+            int currentValue = int.Parse(allNodes[i].GetComponentInChildren<TextMeshPro>().text);
+            int nextValue = int.Parse(allNodes[i + 1].GetComponentInChildren<TextMeshPro>().text);
+            if (currentValue > nextValue) {
+                return false;
+            }
+        }
+        return true;
+    }
 
     // all sorting algorithm check goes here
     private bool IsValidSwap(int index1, int index2) {
@@ -116,6 +131,20 @@ public class NodeController : MonoBehaviour
         gameOverDialog.SetActive(true);
     }
 
+    private void CompleteGame() {
+        Time.timeScale = 0;
+        int starsEarned = 0;
+        if (numLives >= 5) starsEarned = 3;
+        else if (numLives >= 3) starsEarned = 2;
+        else if (numLives >= 1) starsEarned = 1;
+
+        backgroundAudioSource.Stop();
+        backgroundAudioSource.PlayOneShot(winningSound);
+        winningDialog.SetActive(true);
+
+        StartCoroutine(DisplayStarsSequence(starsEarned));
+    }
+
     IEnumerator SwapPositions(GameObject node1, GameObject node2) {
         int node1Index = System.Array.IndexOf(allNodes, node1);
         int node2Index = System.Array.IndexOf(allNodes, node2);
@@ -151,6 +180,11 @@ public class NodeController : MonoBehaviour
                 selectedNode.transform.localScale /= 1.2f;
                 selectedNode = null;
             }
+        }
+
+        if (IsArraySorted()) {
+            CompleteGame();
+            yield break;
         }
 
         isSwapping = false;
@@ -218,5 +252,48 @@ public class NodeController : MonoBehaviour
 
         heartTransform.localScale = Vector3.one;
         livesText.transform.localScale = Vector3.one;
+    }
+
+    IEnumerator DisplayStarsSequence(int starsEarned) {
+        yield return new WaitForSecondsRealtime(0.5f);
+
+        if (starsEarned >= 1) {
+            StarFilled1.SetActive(true);
+            StartCoroutine(PulseStar(StarFilled1));
+            yield return new WaitForSecondsRealtime(1.0f);
+        }
+
+        if (starsEarned >= 2) {
+            StarFilled2.SetActive(true);
+            StartCoroutine(PulseStar(StarFilled2));
+            yield return new WaitForSecondsRealtime(1.0f);
+        }
+
+        if (starsEarned >= 3) {
+            StarFilled3.SetActive(true);
+            StartCoroutine(PulseStar(StarFilled3));
+            yield return new WaitForSecondsRealtime(1.0f);
+        }
+    }
+
+    IEnumerator PulseStar(GameObject star) {
+        float pulseDuration = 1.0f;
+        Vector3 originalScale = star.transform.localScale;
+        Vector3 targetScale = originalScale * 1.5f;
+
+        float timer = 0;
+        while (timer <= pulseDuration / 2) {
+            timer += Time.unscaledDeltaTime;
+            star.transform.localScale = Vector3.Lerp(originalScale, targetScale, timer / (pulseDuration / 2));
+            yield return null;
+        }
+        timer = 0;
+        while (timer <= pulseDuration / 2) {
+            timer += Time.unscaledDeltaTime;
+            star.transform.localScale = Vector3.Lerp(targetScale, originalScale, timer / (pulseDuration / 2));
+            yield return null;
+        }
+
+        star.transform.localScale = originalScale;
     }
 }
