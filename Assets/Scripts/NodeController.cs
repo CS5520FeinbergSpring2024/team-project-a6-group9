@@ -11,6 +11,7 @@ public class NodeController : MonoBehaviour
     public AudioClip correctSound;
     public AudioClip gameOverSound;
     public AudioClip winningSound;
+    public AudioClip starSound;
     public AudioSource backgroundAudioSource;
     private AudioSource audioSource;
     public GameObject nodePrefab;
@@ -18,6 +19,7 @@ public class NodeController : MonoBehaviour
     public int numNodes;
     public int numLives;
     public TextMeshProUGUI livesText;
+    public TextMeshProUGUI coinsEarnedText;
     public GameObject gameOverDialog;
     public GameObject winningDialog;
     public GameObject StarFilled1;
@@ -28,6 +30,7 @@ public class NodeController : MonoBehaviour
     private GameObject selectedNode;
     private Vector3[] snapPositions;
     private bool isSwapping = false;
+    private int playerCoin;
 
     // sort specific variable
     private int sortedBoundary;
@@ -35,7 +38,7 @@ public class NodeController : MonoBehaviour
 
     void Start() {
         audioSource = GetComponentInChildren<AudioSource>();
-        UpdateLives();
+        livesText.text = $"{numLives}";
         
         sortedBoundary = numNodes;
         allNodes = new GameObject[numNodes];
@@ -47,23 +50,31 @@ public class NodeController : MonoBehaviour
         Vector3 center = new Vector3(-893, 500, 0);
         Vector3 scale = new Vector3(15,16,1);
 
-    for (int i = 0; i < allNodes.Length; i++) {
-        Vector3 snapPosition = new Vector3((i + 1) * spacing - (screenWidth / 2)+center.x, center.y, center.z);
-        snapPositions[i] = snapPosition;
+        for (int i = 0; i < allNodes.Length; i++) {
+            Vector3 snapPosition = new Vector3((i + 1) * spacing - (screenWidth / 2)+center.x, center.y, center.z);
+            snapPositions[i] = snapPosition;
 
-        GameObject node = Instantiate(nodePrefab, snapPosition, Quaternion.identity, this.transform);
-        node.tag = "Node";
-        node.transform.localScale = Vector3.zero;
-        allNodes[i] = node;
+            GameObject node = Instantiate(nodePrefab, snapPosition, Quaternion.identity, this.transform);
+            node.tag = "Node";
+            node.transform.localScale = Vector3.zero;
+            allNodes[i] = node;
 
-        StartCoroutine(ScaleNodeToSize(node.transform, scale, 0.5f));
+            StartCoroutine(ScaleNodeToSize(node.transform, scale, 0.5f));
 
-        int randomNumber = Random.Range(1, 100);
-        TextMeshPro textComponent = node.GetComponentInChildren<TextMeshPro>();
-        if (textComponent != null) {
-            textComponent.text = randomNumber.ToString();
+            int randomNumber = Random.Range(1, 100);
+            TextMeshPro textComponent = node.GetComponentInChildren<TextMeshPro>();
+            if (textComponent != null) {
+                textComponent.text = randomNumber.ToString();
+            }
         }
-    }
+
+        if (!PlayerPrefs.HasKey("PlayerCoin")) {
+            playerCoin = 100;
+            PlayerPrefs.SetInt("PlayerCoin", playerCoin);
+        } else {
+            playerCoin = PlayerPrefs.GetInt("PlayerCoin");
+        }
+        coinsEarnedText.text = $"{playerCoin}";
     }
 
     void Update()
@@ -121,7 +132,7 @@ public class NodeController : MonoBehaviour
 
     private void UpdateLives() {
         livesText.text = $"{numLives}";
-        StartCoroutine(PulseEffect());
+        StartCoroutine(PulseHeartEffect());
     }
 
     private void GameOver() {
@@ -134,9 +145,20 @@ public class NodeController : MonoBehaviour
     private void CompleteGame() {
         Time.timeScale = 0;
         int starsEarned = 0;
-        if (numLives >= 5) starsEarned = 3;
-        else if (numLives >= 3) starsEarned = 2;
-        else if (numLives >= 1) starsEarned = 1;
+        if (numLives >= 5) {
+            starsEarned = 3;
+            playerCoin += 100;
+        }
+        else if (numLives >= 3) {
+            starsEarned = 2;
+            playerCoin += 60;
+        }
+        else if (numLives >= 1) {
+            starsEarned = 1;
+            playerCoin += 30;
+        }
+        PlayerPrefs.SetInt("PlayerCoin", playerCoin);
+        PlayerPrefs.Save();
 
         backgroundAudioSource.Stop();
         backgroundAudioSource.PlayOneShot(winningSound);
@@ -226,7 +248,7 @@ public class NodeController : MonoBehaviour
         node.GetComponentInChildren<SpriteRenderer>().color = originalColor;
     }
 
-    IEnumerator PulseEffect() {
+    IEnumerator PulseHeartEffect() {
         Transform heartTransform = heartIcon.transform;
 
         float timeToScale = 0.1f;
@@ -255,25 +277,33 @@ public class NodeController : MonoBehaviour
     }
 
     IEnumerator DisplayStarsSequence(int starsEarned) {
+        int initialCoins = playerCoin - (starsEarned == 3 ? 100 : starsEarned == 2 ? 60 : 30);
+        int finalCoins = playerCoin;
+
         yield return new WaitForSecondsRealtime(0.5f);
 
         if (starsEarned >= 1) {
             StarFilled1.SetActive(true);
             StartCoroutine(PulseStar(StarFilled1));
+            audioSource.PlayOneShot(starSound);
             yield return new WaitForSecondsRealtime(1.0f);
         }
 
         if (starsEarned >= 2) {
             StarFilled2.SetActive(true);
             StartCoroutine(PulseStar(StarFilled2));
+            audioSource.PlayOneShot(starSound);
             yield return new WaitForSecondsRealtime(1.0f);
         }
 
         if (starsEarned >= 3) {
             StarFilled3.SetActive(true);
             StartCoroutine(PulseStar(StarFilled3));
+            audioSource.PlayOneShot(starSound);
             yield return new WaitForSecondsRealtime(1.0f);
         }
+
+        StartCoroutine(UpdateCoinText(initialCoins, finalCoins));
     }
 
     IEnumerator PulseStar(GameObject star) {
@@ -295,5 +325,13 @@ public class NodeController : MonoBehaviour
         }
 
         star.transform.localScale = originalScale;
+    }
+
+    IEnumerator UpdateCoinText(int initialCoins, int finalCoins) {
+        while (initialCoins < finalCoins) {
+            initialCoins++;
+            coinsEarnedText.text = $"{initialCoins}";
+            yield return new WaitForSecondsRealtime(0.02f);
+        }
     }
 }
