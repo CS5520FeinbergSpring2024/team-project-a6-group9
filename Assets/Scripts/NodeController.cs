@@ -5,15 +5,18 @@ using TMPro;
 
 public class NodeController : MonoBehaviour
 {
+    // game effects and UI variables - do not modify
     public AudioClip dragSound;
-    public AudioClip dropSound;
-    public AudioSource backgroundAudioSource;
+    public AudioClip incorrectSound;
+    public AudioClip correctSound;
     public AudioClip gameOverSound;
+    public AudioSource backgroundAudioSource;
+    private AudioSource audioSource;
     public GameObject nodePrefab;
+    public GameObject heartIcon;
     public int numNodes;
     public int numLives;
     public TextMeshProUGUI livesText;
-    public GameObject wrongIndicator;
     public GameObject gameOverDialog;
 
     private GameObject[] allNodes;
@@ -21,11 +24,15 @@ public class NodeController : MonoBehaviour
     private Vector3[] snapPositions;
     private bool isSwapping = false;
 
+    // sort specific variable
+    private int sortedBoundary;
+
 
     void Start() {
+        audioSource = GetComponentInChildren<AudioSource>();
         UpdateLives();
         
-        wrongIndicator.gameObject.SetActive(false);
+        sortedBoundary = numNodes;
         allNodes = new GameObject[numNodes];
         snapPositions = new Vector3[allNodes.Length];
 
@@ -69,10 +76,23 @@ public class NodeController : MonoBehaviour
         }
     }
 
+
+    // all sorting algorithm check goes here
+    private bool IsValidSwap(int index1, int index2) {
+        if (index1 == index2 - 1) {
+            return int.Parse(allNodes[index1].GetComponentInChildren<TextMeshPro>().text) >
+                int.Parse(allNodes[index2].GetComponentInChildren<TextMeshPro>().text);
+        }
+
+        return false;
+    }
+
     private void HandleNodeSelection(GameObject node) {
         if (selectedNode == null) {
             selectedNode = node;
-            selectedNode.transform.localScale *= 1.2f; 
+            audioSource.PlayOneShot(dragSound);
+            selectedNode.transform.localScale *= 1.2f;
+            
         } else {
             if (node != selectedNode) {
                 isSwapping = true;
@@ -84,18 +104,9 @@ public class NodeController : MonoBehaviour
         }
     }
 
-private bool IsValidSwap(int index1, int index2) {
-    if (index1 == index2 - 1) {
-        return int.Parse(allNodes[index1].GetComponentInChildren<TextMeshPro>().text) >
-               int.Parse(allNodes[index2].GetComponentInChildren<TextMeshPro>().text);
-    }
-
-    return false;
-}
-
-
     private void UpdateLives() {
         livesText.text = $"{numLives}";
+        StartCoroutine(PulseEffect());
     }
 
     private void GameOver() {
@@ -112,7 +123,9 @@ private bool IsValidSwap(int index1, int index2) {
         if (!IsValidSwap(node1Index, node2Index)) {
             numLives--;
             UpdateLives();
-            StartCoroutine(ShowIncorrectFeedback());
+            audioSource.PlayOneShot(incorrectSound);
+            StartCoroutine(FlashNodeColor(node1, Color.red, 0.25f));
+            StartCoroutine(FlashNodeColor(node2, Color.red, 0.25f));
 
             if (numLives <= 0) {
                 GameOver();
@@ -126,7 +139,9 @@ private bool IsValidSwap(int index1, int index2) {
         } else {
             StartCoroutine(MoveToPosition(node1.transform, snapPositions[node2Index], 0.25f));
             StartCoroutine(MoveToPosition(node2.transform, snapPositions[node1Index], 0.25f));
-
+            StartCoroutine(FlashNodeColor(node1, Color.green, 0.25f));
+            StartCoroutine(FlashNodeColor(node2, Color.green, 0.25f));
+            audioSource.PlayOneShot(correctSound);
             yield return new WaitForSeconds(0.25f);
 
             allNodes[node1Index] = node2;
@@ -168,9 +183,40 @@ private bool IsValidSwap(int index1, int index2) {
         nodeTransform.localScale = targetScale;
     }
 
-    IEnumerator ShowIncorrectFeedback() {
-        wrongIndicator.gameObject.SetActive(true);
-        yield return new WaitForSeconds(1.0f);
-        wrongIndicator.gameObject.SetActive(false);
-}
+    IEnumerator FlashNodeColor(GameObject node, Color flashColor, float duration) {
+        var originalColor = node.GetComponentInChildren<SpriteRenderer>().color;
+        node.GetComponentInChildren<SpriteRenderer>().color = flashColor;
+
+        yield return new WaitForSeconds(duration);
+
+        node.GetComponentInChildren<SpriteRenderer>().color = originalColor;
+    }
+
+    IEnumerator PulseEffect() {
+        Transform heartTransform = heartIcon.transform;
+
+        float timeToScale = 0.1f;
+        float maxScale = 1.5f;
+        float timer = 0;
+
+        while (timer <= timeToScale) {
+            timer += Time.deltaTime;
+            float scale = Mathf.Lerp(1.0f, maxScale, timer / timeToScale);
+            heartTransform.localScale = new Vector3(scale, scale, 1);
+            livesText.transform.localScale = new Vector3(scale, scale, 1);
+            yield return null;
+        }
+
+        timer = 0;
+        while (timer <= timeToScale) {
+            timer += Time.deltaTime;
+            float scale = Mathf.Lerp(maxScale, 1.0f, timer / timeToScale);
+            heartTransform.localScale = new Vector3(scale, scale, 1);
+            livesText.transform.localScale = new Vector3(scale, scale, 1);
+            yield return null;
+        }
+
+        heartTransform.localScale = Vector3.one;
+        livesText.transform.localScale = Vector3.one;
+    }
 }
