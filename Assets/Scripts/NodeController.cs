@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using UnityEngine.SceneManagement;
 using UnityEngine;
 using TMPro;
 
@@ -12,20 +13,21 @@ public class NodeController : MonoBehaviour
     public AudioClip winningSound;
     public AudioClip starSound;
     public AudioSource backgroundAudioSource;
-    private AudioSource audioSource;
-    public GameObject nodePrefab;
-    public GameObject heartIcon;
-    public int numNodes;
-    public int numLives;
     public TextMeshProUGUI livesText;
     public TextMeshProUGUI coinsEarnedText;
+    public GameObject nodePrefab;
+    public GameObject heartIcon;
     public GameObject gameOverDialog;
     public GameObject winningDialog;
     public GameObject StarFilled1;
     public GameObject StarFilled2;
     public GameObject StarFilled3;
     public ISwapValidator swapValidator;
+    public int numNodes;
+    public int numLives;
+    public string nextLevelSceneName;
 
+    private AudioSource audioSource;
     private GameObject[] allNodes;
     private GameObject selectedNode;
     private Vector3[] snapPositions;
@@ -162,6 +164,14 @@ public class NodeController : MonoBehaviour
         winningDialog.SetActive(true);
 
         StartCoroutine(DisplayStarsSequence(starsEarned));
+    }
+
+    public void LoadNextLevel() {
+        if (!string.IsNullOrEmpty(nextLevelSceneName)) {
+            SceneManager.LoadScene(nextLevelSceneName);
+        } else {
+            Debug.LogError("Next level scene name is not set!");
+        }
     }
 
     IEnumerator SwapPositions(GameObject node1, GameObject node2) {
