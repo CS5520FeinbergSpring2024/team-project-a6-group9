@@ -34,7 +34,6 @@ public class NodeController : MonoBehaviour
     private bool isSwapping = false;
     private int playerCoin;
 
-
     void Start() {
         audioSource = GetComponentInChildren<AudioSource>();
         livesText.text = $"{numLives}";
