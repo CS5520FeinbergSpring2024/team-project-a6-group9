@@ -1,0 +1,26 @@
+﻿<Properties StartupConfiguration="{BB0370F6-E806-5547-4B66-C01ED79C9EBA}|">
+  <MonoDevelop.Ide.Workbench ActiveDocument="Assets/Scripts/BubbleSortValidator.cs">
+    <Files>
+      <File FileName="Assets/Scripts/ISwapValidator.cs" Line="7" Column="2" />
+      <File FileName="Assets/Scripts/BubbleSortValidator.cs" Line="34" Column="22" />
+    </Files>
+    <Pads>
+      <Pad Id="ProjectPad">
+        <State name="__root__">
+          <Node name="team-project-a6-group9" expanded="True">
+            <Node name="Assets" expanded="True" selected="True">
+              <Node name="Scripts" expanded="True" />
+            </Node>
+          </Node>
+        </State>
+      </Pad>
+    </Pads>
+  </MonoDevelop.Ide.Workbench>
+  <MonoDevelop.Ide.DebuggingService.PinnedWatches />
+  <MonoDevelop.Ide.Workspace ActiveConfiguration="Debug" />
+  <MonoDevelop.Ide.ItemProperties.Assembly-CSharp PreferredExecutionTarget="47a1fb38-73af-49b5-9b99-ac89aab3a38e" />
+  <MonoDevelop.Ide.DebuggingService.Breakpoints>
+    <BreakpointStore />
+  </MonoDevelop.Ide.DebuggingService.Breakpoints>
+  <MultiItemStartupConfigurations />
+</Properties>
