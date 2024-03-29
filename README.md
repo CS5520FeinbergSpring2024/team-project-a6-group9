@@ -17,3 +17,5 @@ Documentation: https://docs.github.com/en/repositories/working-with-files/managi
 - Type `git clone https://github.com/CS5520FeinbergSpring2024/team-project-a6-group9.git`
 - Click **Add -> Add project from disk** in Unity, the necessary libraries will be downloaded automatically
 
+## Project UI
+Buttons - Asset LazyDay
