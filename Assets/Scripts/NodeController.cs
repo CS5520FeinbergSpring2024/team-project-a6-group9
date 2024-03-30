@@ -83,7 +83,7 @@ public class NodeController : MonoBehaviour
         // set to 100 for now
         PlayerPrefs.SetInt("PlayerCoin", 100);
         playerCoin = PlayerPrefs.GetInt("PlayerCoin");
-        
+
         // if (!PlayerPrefs.HasKey("PlayerCoin")) {
         //     playerCoin = 100;
         //     PlayerPrefs.SetInt("PlayerCoin", playerCoin);
@@ -141,7 +141,7 @@ public class NodeController : MonoBehaviour
         StartCoroutine(PulseHeartEffect());
     }
 
-    private void GameOver() {
+    public void GameOver() {
         Time.timeScale = 0;
         backgroundAudioSource.Stop();
         backgroundAudioSource.PlayOneShot(gameOverSound);
