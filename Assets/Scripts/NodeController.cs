@@ -34,6 +34,9 @@ public class NodeController : MonoBehaviour
     private bool isSwapping = false;
     private int playerCoin;
 
+    private int startIndex;  //the index of node to be swapped
+
+
     void Start() {
         audioSource = GetComponentInChildren<AudioSource>();
         livesText.text = $"{numLives}";
@@ -75,13 +78,18 @@ public class NodeController : MonoBehaviour
                 textComponent.text = randomNumber.ToString();
             }
         }
+        startIndex = 0;
 
-        if (!PlayerPrefs.HasKey("PlayerCoin")) {
-            playerCoin = 100;
-            PlayerPrefs.SetInt("PlayerCoin", playerCoin);
-        } else {
-            playerCoin = PlayerPrefs.GetInt("PlayerCoin");
-        }
+        // set to 100 for now
+        PlayerPrefs.SetInt("PlayerCoin", 100);
+        playerCoin = PlayerPrefs.GetInt("PlayerCoin");
+        
+        // if (!PlayerPrefs.HasKey("PlayerCoin")) {
+        //     playerCoin = 100;
+        //     PlayerPrefs.SetInt("PlayerCoin", playerCoin);
+        // } else {
+        //     playerCoin = PlayerPrefs.GetInt("PlayerCoin");
+        // }
         coinsEarnedText.text = $"{playerCoin}";
     }
 
@@ -177,7 +185,7 @@ public class NodeController : MonoBehaviour
         int node1Index = System.Array.IndexOf(allNodes, node1);
         int node2Index = System.Array.IndexOf(allNodes, node2);
 
-        if (!swapValidator.IsValidSwap(allNodes, node1Index, node2Index)) {
+        if (!swapValidator.IsValidSwap(allNodes, node1Index, node2Index, startIndex)) {
             numLives--;
             UpdateLives();
             audioSource.PlayOneShot(incorrectSound);
@@ -203,6 +211,8 @@ public class NodeController : MonoBehaviour
 
             allNodes[node1Index] = node2;
             allNodes[node2Index] = node1;
+
+            startIndex++;
 
             if (selectedNode != null) {
                 selectedNode.transform.localScale /= 1.2f;
