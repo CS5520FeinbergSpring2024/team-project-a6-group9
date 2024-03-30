@@ -29,6 +29,7 @@ public class NodeController : MonoBehaviour
 
     private AudioSource audioSource;
     private GameObject[] allNodes;
+    private int[] numbersToBeSorted;
     private GameObject selectedNode;
     private Vector3[] snapPositions;
     private bool isSwapping = false;
@@ -50,6 +51,7 @@ public class NodeController : MonoBehaviour
         }
 
         allNodes = new GameObject[numNodes];
+        numbersToBeSorted = new int[numNodes];
         snapPositions = new Vector3[allNodes.Length];
 
         float screenWidth = Camera.main.orthographicSize * 2.0f * Screen.width / Screen.height;
@@ -74,7 +76,9 @@ public class NodeController : MonoBehaviour
             if (textComponent != null) {
                 textComponent.text = randomNumber.ToString();
             }
+            numbersToBeSorted[i] = randomNumber;
         }
+        swapValidator.SetNumbersToBeSorted(numbersToBeSorted);
 
         if (!PlayerPrefs.HasKey("PlayerCoin")) {
             playerCoin = 100;
@@ -95,7 +99,7 @@ public class NodeController : MonoBehaviour
 
             if (hit.collider != null && hit.collider.gameObject.CompareTag("Node"))
             {
-                HandleNodeSelection(hit.collider.gameObject); 
+                HandleNodeSelection(hit.collider.gameObject);
             }
         }
     }
@@ -116,7 +120,7 @@ public class NodeController : MonoBehaviour
             selectedNode = node;
             audioSource.PlayOneShot(dragSound);
             selectedNode.transform.localScale *= 1.2f;
-            
+
         } else {
             if (node != selectedNode) {
                 isSwapping = true;
