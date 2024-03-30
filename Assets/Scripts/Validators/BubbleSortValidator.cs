@@ -28,7 +28,7 @@ public class BubbleSortValidator : MonoBehaviour, ISwapValidator {
 
             if (currentValue > nextValue) {
                 if (i == index1 && (i + 1) == index2) {
-                    lastSwapIndex = i + 1; 
+                    lastSwapIndex = i + 1;
 
                     if (lastSwapIndex == sortedBoundary) {
                         sortedBoundary--;
@@ -48,4 +48,7 @@ public class BubbleSortValidator : MonoBehaviour, ISwapValidator {
         lastSwapIndex = -1;
         return false;
     }
+
+    public void SetNumbersToBeSorted(int[] numbersToBeSorted)
+    {}
 }
