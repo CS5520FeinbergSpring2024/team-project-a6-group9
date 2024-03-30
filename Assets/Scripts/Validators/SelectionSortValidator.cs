@@ -27,4 +27,7 @@ public class SelectionSortValidator : MonoBehaviour, ISwapValidator {
         }
     return false;
     }
+
+    public void SetNumbersToBeSorted(int[] numbersToBeSorted)
+    {}
 }
