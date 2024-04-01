@@ -48,15 +48,11 @@ public class NodeController : MonoBehaviour
         itemManager = FindObjectOfType<ItemManager>();
         swapValidator = GetComponent<ISwapValidator>();
 
-        if (swapValidator == null) {
-            swapValidator = FindObjectOfType(typeof(ISwapValidator)) as ISwapValidator;
-        }
-        if (swapValidator == null) {
-            Debug.LogError("No swap validator found in the scene!");
-            return;
-        }
-        if (itemManager == null) {
-            Debug.LogError("ItemManager not found in the scene!");
+        InitializeGame();
+
+        if (IsArraySorted()) {
+            Debug.Log("Array was sorted, regenerating...");
+            InitializeGame();
         }
 
         livesText.text = $"{numLives}";
@@ -75,6 +71,20 @@ public class NodeController : MonoBehaviour
 
         hintsText.text = $"{itemManager?.HintCount ?? 0}";
         autoCompleteText.text=$"{itemManager?.AutoCompleteCount ?? 0}";
+    }
+
+    void InitializeGame() {
+        if (swapValidator == null) {
+            swapValidator = FindObjectOfType(typeof(ISwapValidator)) as ISwapValidator;
+        }
+        if (swapValidator == null) {
+            Debug.LogError("No swap validator found in the scene!");
+            return;
+        }
+
+        if (itemManager == null) {
+            Debug.LogError("ItemManager not found in the scene!");
+        }
 
         allNodes = new GameObject[numNodes];
         numbersToBeSorted = new int[numNodes];
@@ -87,7 +97,7 @@ public class NodeController : MonoBehaviour
         Vector3 scale = new Vector3(15,16,1);
 
         for (int i = 0; i < allNodes.Length; i++) {
-            Vector3 snapPosition = new Vector3((i + 1) * spacing - (screenWidth / 2)+center.x, center.y, center.z);
+            Vector3 snapPosition = new Vector3((i + 1) * spacing - (screenWidth / 2) + center.x, center.y, center.z);
             snapPositions[i] = snapPosition;
 
             GameObject node = Instantiate(nodePrefab, snapPosition, Quaternion.identity, this.transform);
@@ -103,7 +113,8 @@ public class NodeController : MonoBehaviour
                 textComponent.text = randomNumber.ToString();
             }
             numbersToBeSorted[i] = randomNumber;
-        }
+            }
+
         startIndex = 0;
         swapValidator.SetNumbersToBeSorted(numbersToBeSorted);
     }
@@ -236,7 +247,10 @@ public class NodeController : MonoBehaviour
     }
 
     public void UseAutoComplete() {
-        UpdateCompleteCountUI();
+        if (itemManager.ConsumeAutoComplete()) {
+            StartCoroutine(AutoCompleteSort());
+            UpdateCompleteCountUI();
+        }
     }
 
 
@@ -245,7 +259,7 @@ public class NodeController : MonoBehaviour
 
 
     // effects
-    IEnumerator SwapPositions(GameObject node1, GameObject node2) {
+    private IEnumerator SwapPositions(GameObject node1, GameObject node2) {
         int node1Index = System.Array.IndexOf(allNodes, node1);
         int node2Index = System.Array.IndexOf(allNodes, node2);
 
@@ -292,7 +306,7 @@ public class NodeController : MonoBehaviour
         isSwapping = false;
     }
 
-    IEnumerator MoveToPosition(Transform objectTransform, Vector3 position, float duration) {
+    private IEnumerator MoveToPosition(Transform objectTransform, Vector3 position, float duration) {
         Vector3 startPosition = objectTransform.position;
         float elapsedTime = 0;
 
@@ -305,7 +319,7 @@ public class NodeController : MonoBehaviour
         objectTransform.position = position;
     }
 
-    IEnumerator ScaleNodeToSize(Transform nodeTransform, Vector3 targetScale, float duration) {
+    private IEnumerator ScaleNodeToSize(Transform nodeTransform, Vector3 targetScale, float duration) {
         float elapsedTime = 0;
         Vector3 startingScale = nodeTransform.localScale;
 
@@ -318,7 +332,7 @@ public class NodeController : MonoBehaviour
         nodeTransform.localScale = targetScale;
     }
 
-    IEnumerator FlashNodeColor(GameObject node, Color flashColor, float duration) {
+    private IEnumerator FlashNodeColor(GameObject node, Color flashColor, float duration) {
         var originalColor = node.GetComponentInChildren<SpriteRenderer>().color;
         node.GetComponentInChildren<SpriteRenderer>().color = flashColor;
 
@@ -327,7 +341,7 @@ public class NodeController : MonoBehaviour
         node.GetComponentInChildren<SpriteRenderer>().color = originalColor;
     }
 
-    IEnumerator PulseHeartEffect() {
+    private IEnumerator PulseHeartEffect() {
         Transform heartTransform = heartIcon.transform;
 
         float timeToScale = 0.1f;
@@ -355,7 +369,7 @@ public class NodeController : MonoBehaviour
         livesText.transform.localScale = Vector3.one;
     }
 
-    IEnumerator DisplayStarsSequence(int starsEarned) {
+    private IEnumerator DisplayStarsSequence(int starsEarned) {
         int initialCoins = playerCoin - (starsEarned == 3 ? 100 : starsEarned == 2 ? 60 : 30);
         int finalCoins = playerCoin;
 
@@ -385,7 +399,7 @@ public class NodeController : MonoBehaviour
         StartCoroutine(UpdateCoinText(initialCoins, finalCoins));
     }
 
-    IEnumerator PulseStar(GameObject star) {
+    private IEnumerator PulseStar(GameObject star) {
         float pulseDuration = 1.0f;
         Vector3 originalScale = star.transform.localScale;
         Vector3 targetScale = originalScale * 1.5f;
@@ -406,11 +420,23 @@ public class NodeController : MonoBehaviour
         star.transform.localScale = originalScale;
     }
 
-    IEnumerator UpdateCoinText(int initialCoins, int finalCoins) {
+    private IEnumerator UpdateCoinText(int initialCoins, int finalCoins) {
         while (initialCoins < finalCoins) {
             initialCoins++;
             coinsEarnedText.text = $"{initialCoins}";
             yield return new WaitForSecondsRealtime(0.02f);
+        }
+    }
+
+    private IEnumerator AutoCompleteSort() {
+        while (!IsArraySorted()) {
+            var swapPair = swapValidator.GetNextSwap(allNodes);
+            if (swapPair.Item1 != -1 && swapPair.Item2 != -1) {
+                yield return StartCoroutine(SwapPositions(allNodes[swapPair.Item1], allNodes[swapPair.Item2]));
+                yield return new WaitForSeconds(0.5f);
+            } else {
+                break;
+            }
         }
     }
 }
