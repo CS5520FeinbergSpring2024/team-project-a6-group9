@@ -35,4 +35,8 @@ public class InsertionSortValidator : MonoBehaviour, ISwapValidator
         this.numbersToBeSorted = numbersToBeSorted;
         key = numbersToBeSorted[i];
     }
+
+    public (int, int) GetNextSwap(GameObject[] nodes) {
+        return (-1, -1);
+    }
 }
