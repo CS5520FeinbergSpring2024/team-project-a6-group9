@@ -15,6 +15,8 @@ public class NodeController : MonoBehaviour
     public AudioSource backgroundAudioSource;
     public TextMeshProUGUI livesText;
     public TextMeshProUGUI coinsEarnedText;
+    public TextMeshProUGUI hintsText;
+    public TextMeshProUGUI autoCompleteText;
     public GameObject nodePrefab;
     public GameObject heartIcon;
     public GameObject gameOverDialog;
@@ -27,6 +29,7 @@ public class NodeController : MonoBehaviour
     public int numLives;
     public string nextLevelSceneName;
     public NavigationHandler navigationHandler;
+    public ItemManager itemManager;
 
     private AudioSource audioSource;
     private GameObject[] allNodes;
@@ -42,19 +45,36 @@ public class NodeController : MonoBehaviour
     void Start() {
         audioSource = GetComponentInChildren<AudioSource>();
         navigationHandler = FindObjectOfType<NavigationHandler>();
-
-        livesText.text = $"{numLives}";
-
+        itemManager = FindObjectOfType<ItemManager>();
         swapValidator = GetComponent<ISwapValidator>();
 
         if (swapValidator == null) {
             swapValidator = FindObjectOfType(typeof(ISwapValidator)) as ISwapValidator;
         }
-
         if (swapValidator == null) {
             Debug.LogError("No swap validator found in the scene!");
             return;
         }
+        if (itemManager == null) {
+            Debug.LogError("ItemManager not found in the scene!");
+        }
+
+        livesText.text = $"{numLives}";
+        
+        // set to 100 for now
+        PlayerPrefs.SetInt("PlayerCoin", 100);
+        playerCoin = PlayerPrefs.GetInt("PlayerCoin");
+
+        // if (!PlayerPrefs.HasKey("PlayerCoin")) {
+        //     playerCoin = 100;
+        //     PlayerPrefs.SetInt("PlayerCoin", playerCoin);
+        // } else {
+        //     playerCoin = PlayerPrefs.GetInt("PlayerCoin");
+        // }
+        coinsEarnedText.text = $"{playerCoin}";
+
+        hintsText.text = $"{itemManager?.HintCount ?? 0}";
+        autoCompleteText.text=$"{itemManager?.AutoCompleteCount ?? 0}";
 
         allNodes = new GameObject[numNodes];
         numbersToBeSorted = new int[numNodes];
@@ -86,18 +106,6 @@ public class NodeController : MonoBehaviour
         }
         startIndex = 0;
         swapValidator.SetNumbersToBeSorted(numbersToBeSorted);
-
-        // set to 100 for now
-        PlayerPrefs.SetInt("PlayerCoin", 100);
-        playerCoin = PlayerPrefs.GetInt("PlayerCoin");
-
-        // if (!PlayerPrefs.HasKey("PlayerCoin")) {
-        //     playerCoin = 100;
-        //     PlayerPrefs.SetInt("PlayerCoin", playerCoin);
-        // } else {
-        //     playerCoin = PlayerPrefs.GetInt("PlayerCoin");
-        // }
-        coinsEarnedText.text = $"{playerCoin}";
     }
 
     void Update()
@@ -146,6 +154,14 @@ public class NodeController : MonoBehaviour
     private void UpdateLives() {
         livesText.text = $"{numLives}";
         StartCoroutine(PulseHeartEffect());
+    }
+
+    private void UpdateHintCountUI() {
+        hintsText.text = $"{itemManager?.HintCount ?? 0}";
+    }
+    
+    private void UpdateCompleteCountUI() {
+        autoCompleteText.text = $"{itemManager?.AutoCompleteCount ?? 0}";
     }
 
     public void GameOver() {
@@ -207,6 +223,28 @@ public class NodeController : MonoBehaviour
         }
     }
 
+    public void UseHint() {
+        if (itemManager.ConsumeHint()) {
+            var swapPair = swapValidator.GetNextSwap(allNodes);
+            if (swapPair.Item1 != -1 && swapPair.Item2 != -1) {
+                StartCoroutine(SwapPositions(allNodes[swapPair.Item1], allNodes[swapPair.Item2]));
+            } else {
+                Debug.Log("No swap needed or hint not applicable.");
+            }
+            UpdateHintCountUI();
+        }
+    }
+
+    public void UseAutoComplete() {
+        UpdateCompleteCountUI();
+    }
+
+
+
+
+
+
+    // effects
     IEnumerator SwapPositions(GameObject node1, GameObject node2) {
         int node1Index = System.Array.IndexOf(allNodes, node1);
         int node2Index = System.Array.IndexOf(allNodes, node2);
@@ -253,7 +291,6 @@ public class NodeController : MonoBehaviour
 
         isSwapping = false;
     }
-
 
     IEnumerator MoveToPosition(Transform objectTransform, Vector3 position, float duration) {
         Vector3 startPosition = objectTransform.position;

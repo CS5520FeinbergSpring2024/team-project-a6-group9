@@ -30,4 +30,8 @@ public class SelectionSortValidator : MonoBehaviour, ISwapValidator {
 
     public void SetNumbersToBeSorted(int[] numbersToBeSorted)
     {}
+
+    public (int, int) GetNextSwap(GameObject[] nodes) {
+        return (-1, -1);
+    }
 }
