@@ -50,6 +50,18 @@ public class NavigationHandler : MonoBehaviour
             button.GetComponent<Button>().interactable = interactable;
     }
 
+    public void SetButtonsInteractableExcept(GameObject exceptionButton, bool interactable) {
+        SetButtonInteractable(pauseButton, pauseButton == exceptionButton || interactable);
+        SetButtonInteractable(playButton, playButton == exceptionButton || interactable);
+        SetButtonInteractable(soundOnButton, soundOnButton == exceptionButton || interactable);
+        SetButtonInteractable(soundOffButton, soundOffButton == exceptionButton || interactable);
+        SetButtonInteractable(settingButton, settingButton == exceptionButton || interactable);
+        SetButtonInteractable(shopButton, shopButton == exceptionButton || interactable);
+        SetButtonInteractable(backButton, backButton == exceptionButton || interactable);
+        SetButtonInteractable(homeButton, homeButton == exceptionButton || interactable);
+        SetButtonInteractable(restartButton, restartButton == exceptionButton || interactable);
+    }
+
     public void PlayButtonSound()
     {
         if (playButtonSound && uiAudioSource != null && buttonSound != null)
@@ -115,14 +127,7 @@ public class NavigationHandler : MonoBehaviour
     {
         bool isActive = !settingsMenu.activeSelf;
         settingsMenu.SetActive(isActive);
-        SetButtonInteractable(playButton, !isActive);
-        SetButtonInteractable(pauseButton, !isActive);
-        SetButtonInteractable(soundOnButton, !isActive);
-        SetButtonInteractable(soundOffButton, !isActive);
-        SetButtonInteractable(shopButton, !isActive);
-        SetButtonInteractable(backButton, !isActive);
-        SetButtonInteractable(homeButton, !isActive);
-        SetButtonInteractable(restartButton, !isActive);
+        SetButtonsInteractableExcept(settingButton, !isActive);
         if (isActive) PauseGame();
         else UnpauseGame();
     }
@@ -131,14 +136,7 @@ public class NavigationHandler : MonoBehaviour
     {
         bool isActive = !shopMenu.activeSelf;
         shopMenu.SetActive(isActive);
-        SetButtonInteractable(playButton, !isActive);
-        SetButtonInteractable(pauseButton, !isActive);
-        SetButtonInteractable(soundOnButton, !isActive);
-        SetButtonInteractable(soundOffButton, !isActive);
-        SetButtonInteractable(settingButton, !isActive);
-        SetButtonInteractable(backButton, !isActive);
-        SetButtonInteractable(homeButton, !isActive);
-        SetButtonInteractable(restartButton, !isActive);
+        SetButtonsInteractableExcept(shopButton, !isActive);
         if (isActive)
         {
             Time.timeScale = 0f;
@@ -167,14 +165,7 @@ public class NavigationHandler : MonoBehaviour
         {
             confirmationDialogHome.SetActive(true);
             PauseGame();
-            SetButtonInteractable(playButton, false);
-            SetButtonInteractable(pauseButton, false);
-            SetButtonInteractable(soundOnButton, false);
-            SetButtonInteractable(soundOffButton, false);
-            SetButtonInteractable(settingButton, false);
-            SetButtonInteractable(backButton, false);
-            SetButtonInteractable(shopButton, false);
-            SetButtonInteractable(restartButton, false);
+            SetButtonsInteractableExcept(homeButton, false);
         }
         else
         {
@@ -192,14 +183,7 @@ public class NavigationHandler : MonoBehaviour
     {
         confirmationDialogHome.SetActive(false);
         UnpauseGame();
-        SetButtonInteractable(playButton, true);
-        SetButtonInteractable(pauseButton, true);
-        SetButtonInteractable(soundOnButton, true);
-        SetButtonInteractable(soundOffButton, true);
-        SetButtonInteractable(settingButton, true);
-        SetButtonInteractable(backButton, true);
-        SetButtonInteractable(shopButton, true);
-        SetButtonInteractable(restartButton, true);
+        SetButtonsInteractableExcept(null, true);
     }
 
     public void RequestGoToLevelSelect()
@@ -208,14 +192,7 @@ public class NavigationHandler : MonoBehaviour
         {
             confirmationDialogBack.SetActive(true);
             PauseGame();
-            SetButtonInteractable(playButton, false);
-            SetButtonInteractable(pauseButton, false);
-            SetButtonInteractable(soundOnButton, false);
-            SetButtonInteractable(soundOffButton, false);
-            SetButtonInteractable(settingButton, false);
-            SetButtonInteractable(homeButton, false);
-            SetButtonInteractable(shopButton, false);
-            SetButtonInteractable(restartButton, false);
+            SetButtonsInteractableExcept(backButton, false);
         }
         else
         {
@@ -233,14 +210,7 @@ public class NavigationHandler : MonoBehaviour
     {
         confirmationDialogBack.SetActive(false);
         UnpauseGame();
-        SetButtonInteractable(playButton, true);
-        SetButtonInteractable(pauseButton, true);
-        SetButtonInteractable(soundOnButton, true);
-        SetButtonInteractable(soundOffButton, true);
-        SetButtonInteractable(settingButton, true);
-        SetButtonInteractable(homeButton, true);
-        SetButtonInteractable(shopButton, true);
-        SetButtonInteractable(restartButton, true);
+        SetButtonsInteractableExcept(null, true);
     }
 
     public void RequestRestart()
@@ -249,14 +219,7 @@ public class NavigationHandler : MonoBehaviour
         {
             confirmationDialogRestart.SetActive(true);
             PauseGame();
-            SetButtonInteractable(playButton, false);
-            SetButtonInteractable(pauseButton, false);
-            SetButtonInteractable(soundOnButton, false);
-            SetButtonInteractable(soundOffButton, false);
-            SetButtonInteractable(settingButton, false);
-            SetButtonInteractable(homeButton, false);
-            SetButtonInteractable(shopButton, false);
-            SetButtonInteractable(backButton, false);
+            SetButtonsInteractableExcept(restartButton, false);
         }
         else
         {
@@ -274,15 +237,10 @@ public class NavigationHandler : MonoBehaviour
     {
         confirmationDialogRestart.SetActive(false);
         UnpauseGame();
-        SetButtonInteractable(playButton, true);
-        SetButtonInteractable(pauseButton, true);
-        SetButtonInteractable(soundOnButton, true);
-        SetButtonInteractable(soundOffButton, true);
-        SetButtonInteractable(settingButton, true);
-        SetButtonInteractable(homeButton, true);
-        SetButtonInteractable(shopButton, true);
-        SetButtonInteractable(backButton, true);
+        SetButtonsInteractableExcept(null, true);
     }
+
+    
 
     IEnumerator ShakeGameObject(GameObject obj, float duration, float magnitude)
     {

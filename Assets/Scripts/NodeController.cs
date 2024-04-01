@@ -26,6 +26,7 @@ public class NodeController : MonoBehaviour
     public int numNodes;
     public int numLives;
     public string nextLevelSceneName;
+    public NavigationHandler navigationHandler;
 
     private AudioSource audioSource;
     private GameObject[] allNodes;
@@ -40,6 +41,8 @@ public class NodeController : MonoBehaviour
 
     void Start() {
         audioSource = GetComponentInChildren<AudioSource>();
+        navigationHandler = FindObjectOfType<NavigationHandler>();
+
         livesText.text = $"{numLives}";
 
         swapValidator = GetComponent<ISwapValidator>();
@@ -150,6 +153,12 @@ public class NodeController : MonoBehaviour
         backgroundAudioSource.Stop();
         backgroundAudioSource.PlayOneShot(gameOverSound);
         gameOverDialog.SetActive(true);
+        
+        if (navigationHandler != null) {
+            navigationHandler.SetButtonsInteractableExcept(null, false);
+        } else {
+            Debug.LogWarning("NavigationHandler not found in the scene!");
+        }
     }
 
     private void CompleteGame() {
@@ -173,13 +182,26 @@ public class NodeController : MonoBehaviour
         backgroundAudioSource.Stop();
         backgroundAudioSource.PlayOneShot(winningSound);
         winningDialog.SetActive(true);
+        
+        if (navigationHandler != null) {
+            navigationHandler.SetButtonsInteractableExcept(null, false);
+        } else {
+            Debug.LogWarning("NavigationHandler not found in the scene!");
+        }
 
         StartCoroutine(DisplayStarsSequence(starsEarned));
     }
 
     public void LoadNextLevel() {
         if (!string.IsNullOrEmpty(nextLevelSceneName)) {
+            Time.timeScale = 1;
             SceneManager.LoadScene(nextLevelSceneName);
+        
+            if (navigationHandler != null) {
+                navigationHandler.SetButtonsInteractableExcept(null, true);
+            } else {
+                Debug.LogWarning("NavigationHandler not found in the scene!");
+            }
         } else {
             Debug.LogError("Next level scene name is not set!");
         }
