@@ -21,8 +21,15 @@ Documentation: https://docs.github.com/en/repositories/working-with-files/managi
 Buttons - Asset LazyDay
 
 
-## For each scene/level - adjust following
-    - Pause - Window - Content - Restart Button: adjust to current scene index
-    - Game Over - Window - Content - Restart Button: adjust to current scene index
-    - Game Over Time (if exist): same as above
-    - You Win - Window - Content - Next Button: adjust to next scene index
+## For each scene/level - adjust the following
+For easy replacement from previous UI theme: copy the entire **BubbleSort1.unity** and replace the validator in **NodeManager** to your validator; implement `GetNextSwap()` in your validator; replace scene indices as indicated below.
+    - Attach the correct validator to NodeManager
+    - `(int, int) GetNextSwap(GameObject[] nodes)` returns a pair of index for the next valid swap, used for hints and auto-complete. Return (-1, -1) indicates no swap is available.
+    - Implement `GetNextSwap()` in your `XXXSortValidator` which implements `ISwapValidator`
+
+    Adjust the following scene indices:
+        - Pause - Window - Content - Restart Button: adjust to current scene index
+        - Game Over - Window - Content - Restart Button: adjust to current scene index
+        - Game Over Time (if exist): same as above
+        - You Win - Window - Content - Next Button: adjust to next scene index
+
