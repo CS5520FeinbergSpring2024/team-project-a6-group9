@@ -24,4 +24,5 @@ Buttons - Asset LazyDay
 ## For each scene/level - adjust following
     - Pause - Window - Content - Restart Button: adjust to current scene index
     - Game Over - Window - Content - Restart Button: adjust to current scene index
+    - Game Over Time (if exist): same as above
     - You Win - Window - Content - Next Button: adjust to next scene index
