@@ -1,5 +1,4 @@
-﻿using System.Collections;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using UnityEngine;
 using TMPro;
 
@@ -9,6 +8,9 @@ public class Shop : MonoBehaviour
     public TextMeshProUGUI itemName, itemPrice;
     public TextMeshProUGUI livesCount, hintsCount, autoCompleteCount;
     public Animation notEnough;
+    public AudioSource backgroundAudioSource;
+    public AudioClip shopBGM;
+    public AudioClip defaultBGM;
 
     public Transform items;
     private List<GameObject> gameItems;
@@ -55,30 +57,30 @@ public class Shop : MonoBehaviour
         }
     }
 
-private void LoadItems()
-{
-    gameItems = new List<GameObject>();
-
-    foreach(Transform item in items)
+    private void LoadItems()
     {
-        gameItems.Add(item.gameObject);
+        gameItems = new List<GameObject>();
+
+        foreach(Transform item in items)
+        {
+            gameItems.Add(item.gameObject);
+        }
+
+        UpdateDisplayedItem();
     }
 
-    UpdateDisplayedItem();
-}
-
-private void UpdateDisplayedItem()
-{
-    for(int i = 0; i < gameItems.Count; i++)
+    private void UpdateDisplayedItem()
     {
-        gameItems[i].SetActive(i == itemIndex);
+        for(int i = 0; i < gameItems.Count; i++)
+        {
+            gameItems[i].SetActive(i == itemIndex);
+        }
+
+        Item currentItem = gameItems[itemIndex].GetComponent<Item>();
+
+        itemName.text = gameItems[itemIndex].name;
+        itemPrice.text = currentItem.price.ToString();
     }
-
-    Item currentItem = gameItems[itemIndex].GetComponent<Item>();
-
-    itemName.text = gameItems[itemIndex].name;
-    itemPrice.text = currentItem.price.ToString();
-}
 
 
     private void UpdateItemCount(Item item)
@@ -102,4 +104,17 @@ private void UpdateDisplayedItem()
                 break;
         }
     }
+
+    public void PlayShopBGM()
+    {
+        backgroundAudioSource.clip = shopBGM;
+        backgroundAudioSource.Play();
+    }
+
+    public void PlayDefaultBGM()
+    {
+        backgroundAudioSource.clip = defaultBGM;
+        backgroundAudioSource.Play();
+    }
+
 }

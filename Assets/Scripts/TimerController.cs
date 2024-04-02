@@ -1,4 +1,3 @@
-using System.Collections;
 using UnityEngine;
 using TMPro;
 
@@ -7,16 +6,18 @@ public class TimerController : MonoBehaviour {
     public float startTime; 
     public GameObject clockObject; 
     private GameOverTime gameOverTime;
+    private NodeController nodeController;
     private float timeRemaining;
     private bool timerIsActive = false;
 
     void Start() {
         gameOverTime = FindObjectOfType<GameOverTime>();
+        nodeController = FindObjectOfType<NodeController>();
         ResetTimer();
     }
 
     void Update() {
-        if (timerIsActive) {
+        if (timerIsActive && !nodeController.isGamePaused) {
             if (timeRemaining > 0) {
                 timeRemaining -= Time.deltaTime;
                 UpdateTimerDisplay();

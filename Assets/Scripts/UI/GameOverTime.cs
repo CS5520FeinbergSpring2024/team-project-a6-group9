@@ -1,6 +1,5 @@
 using UnityEngine;
 using TMPro;
-using UnityEngine.Timeline;
 
 public class GameOverTime : MonoBehaviour
 {
@@ -36,6 +35,7 @@ public class GameOverTime : MonoBehaviour
     {
         isGameOver = true;
 
+        nodeController.PauseGameInteractivity();
         anim.Play("Window-In");
         menu.SetActive(false);
         backgroundAudioSource.Stop();
@@ -56,7 +56,9 @@ public class GameOverTime : MonoBehaviour
             backgroundAudioSource.Stop();
             backgroundAudioSource.Play();
             menu.SetActive(true);
-            nodeController.ResumeGame();
+            nodeController.ResumeFromGameOver();
+            nodeController.UnpauseGameInteractivity(); 
+
         }
         else
         {

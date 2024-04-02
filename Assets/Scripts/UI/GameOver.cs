@@ -33,6 +33,7 @@ public class GameOver : MonoBehaviour
     {
         isGameOver = true;
 
+        nodeController.PauseGameInteractivity();
         anim.Play("Window-In");
         menu.SetActive(false);
         backgroundAudioSource.Stop();
@@ -55,7 +56,8 @@ public class GameOver : MonoBehaviour
             backgroundAudioSource.Stop();
             backgroundAudioSource.Play();
             menu.SetActive(true);
-            nodeController.ResumeGame();
+            nodeController.ResumeFromGameOver();
+            nodeController.UnpauseGameInteractivity();
         }
         else
         {

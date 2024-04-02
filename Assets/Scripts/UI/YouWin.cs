@@ -24,6 +24,7 @@ public class YouWin : MonoBehaviour
 
     public void CompleteGame()
     {
+        nodeController.PauseGameInteractivity();
         anim.Play("Window-In");
         int starsEarned = 0;
         if (itemManager.LifeCount >= 5) starsEarned = 3;

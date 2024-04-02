@@ -49,8 +49,11 @@ public class Settings : MonoBehaviour
 
     public void Reset()
     {
-        PlayerPrefs.DeleteAll();
-        SceneManager.LoadScene(SceneManager.GetActiveScene().name);
+        PlayerPrefs.SetInt("Sounds", 1);
+        PlayerPrefs.SetInt("Vibration", 1);
+
+        SetSounds();
+        SetVibration();
     }
 
     public static bool GetSetting(string name)

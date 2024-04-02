@@ -20,10 +20,13 @@ public class NodeController : MonoBehaviour
     public GameObject autoCompleteIcon;
     public ISwapValidator swapValidator;
     public int numNodes;
+    [HideInInspector]
+    public bool isGamePaused = false;
+
+
     private ItemManager itemManager;
     private GameOver gameOver;
     private YouWin youWin;
-
     private AudioSource audioSource;
     private GameObject[] allNodes;
     private int[] numbersToBeSorted;
@@ -58,6 +61,7 @@ public class NodeController : MonoBehaviour
     void InitializeGame() {
         swapValidator ??= FindObjectOfType(typeof(ISwapValidator)) as ISwapValidator;
 
+        isGamePaused = false;
 
         Wallet.SetAmount(999); 
 
@@ -121,6 +125,9 @@ public class NodeController : MonoBehaviour
     }
 
     private void HandleNodeSelection(GameObject node) {
+        if (isGamePaused) {
+            return;
+        }
         if (selectedNode == null) {
             selectedNode = node;
             audioSource.PlayOneShot(dragSound);
@@ -144,7 +151,7 @@ public class NodeController : MonoBehaviour
         }
     }
 
-    public void ResumeGame() {
+    public void ResumeFromGameOver() {
         isSwapping = false;
         ResetSelectedNode();
     }
@@ -190,6 +197,15 @@ public class NodeController : MonoBehaviour
         }
     }
 
+    public void PauseGameInteractivity() {
+        isGamePaused = true;
+        Debug.Log($"pause state: {isGamePaused}");
+    }
+
+    public void UnpauseGameInteractivity() {
+        isGamePaused = false;
+        Debug.Log($"pause state: {isGamePaused}");
+    }
 
 
 
