@@ -6,15 +6,12 @@ public class TimerController : MonoBehaviour {
     public TextMeshProUGUI timerText;
     public float startTime; 
     public GameObject clockObject; 
-    public GameOver gameOver;
+    private GameOverTime gameOverTime;
     private float timeRemaining;
     private bool timerIsActive = false;
-    private bool isShaking = false;
-    private NodeController nodeController;
 
     void Start() {
-        nodeController = FindObjectOfType<NodeController>();
-        gameOver = FindObjectOfType<GameOver>();
+        gameOverTime = FindObjectOfType<GameOverTime>();
         ResetTimer();
     }
 
@@ -25,15 +22,12 @@ public class TimerController : MonoBehaviour {
                 UpdateTimerDisplay();
 
                 if (timeRemaining <= 5f && timeRemaining > 0) {
-                    if (!isShaking) {
-                        isShaking = true;
-                    }
                     timerText.color = Color.red;
                 }
             } else {
                 timerIsActive = false;
                 timeRemaining = 0;
-                gameOver.GameOverControl();
+                gameOverTime.GameOverControl();
                 UpdateTimerDisplay();
             }
         }
@@ -43,6 +37,18 @@ public class TimerController : MonoBehaviour {
         timeRemaining = startTime;
         timerIsActive = true;
         timerText.color = Color.white; 
+        UpdateTimerDisplay();
+    }
+
+    public void AddTime(int additionalTime) {
+        timeRemaining += additionalTime;
+        if (!timerIsActive) {
+            timerIsActive = true;
+        }
+        if (timeRemaining > 5) {
+            timerText.color = Color.white;
+        }
+
         UpdateTimerDisplay();
     }
 
