@@ -16,6 +16,5 @@
 *.mm filter=lfs diff=lfs merge=lfs -text
 *.docx filter=lfs diff=lfs merge=lfs -text
 *.mdb filter=lfs diff=lfs merge=lfs -text
-Assets/Scenes/SelectionSort2.unity filter=lfs diff=lfs merge=lfs -text
-Assets/Scenes/SelectionSort3.unity filter=lfs diff=lfs merge=lfs -text
-Assets/Scenes/SelectionSort1.unity filter=lfs diff=lfs merge=lfs -text
+*.json filter=lfs diff=lfs merge=lfs -text
+*.controller filter=lfs diff=lfs merge=lfs -text
