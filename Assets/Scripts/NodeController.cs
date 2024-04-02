@@ -9,44 +9,41 @@ public class NodeController : MonoBehaviour
     public AudioClip dragSound;
     public AudioClip incorrectSound;
     public AudioClip correctSound;
-    public AudioClip gameOverSound;
     public AudioClip winningSound;
     public AudioClip starSound;
     public AudioSource backgroundAudioSource;
     public TextMeshProUGUI livesText;
-    public TextMeshProUGUI coinsEarnedText;
     public TextMeshProUGUI hintsText;
     public TextMeshProUGUI autoCompleteText;
+    public TextMeshProUGUI coinsText;
     public GameObject nodePrefab;
     public GameObject heartIcon;
-    public GameObject gameOverDialog;
-    public GameObject winningDialog;
     public GameObject StarFilled1;
     public GameObject StarFilled2;
     public GameObject StarFilled3;
     public ISwapValidator swapValidator;
     public int numNodes;
-    public int numLives;
-    public string nextLevelSceneName;
-    public NavigationHandler navigationHandler;
+    [HideInInspector]
     public ItemManager itemManager;
+    [HideInInspector]
+    public GameOver gameOver;
 
     private AudioSource audioSource;
+    private int numLives;
     private GameObject[] allNodes;
     private int[] numbersToBeSorted;
     private GameObject selectedNode;
     private Vector3[] snapPositions;
     private bool isSwapping = false;
-    private int playerCoin;
 
     private int startIndex;  //the index of node to be swapped
 
 
     void Start() {
         audioSource = GetComponentInChildren<AudioSource>();
-        navigationHandler = FindObjectOfType<NavigationHandler>();
         itemManager = FindObjectOfType<ItemManager>();
         swapValidator = GetComponent<ISwapValidator>();
+        gameOver = FindObjectOfType<GameOver>();
 
         InitializeGame();
 
@@ -56,21 +53,10 @@ public class NodeController : MonoBehaviour
         }
 
         livesText.text = $"{numLives}";
-        
-        // set to 100 for now
-        PlayerPrefs.SetInt("PlayerCoin", 100);
-        playerCoin = PlayerPrefs.GetInt("PlayerCoin");
-
-        // if (!PlayerPrefs.HasKey("PlayerCoin")) {
-        //     playerCoin = 100;
-        //     PlayerPrefs.SetInt("PlayerCoin", playerCoin);
-        // } else {
-        //     playerCoin = PlayerPrefs.GetInt("PlayerCoin");
-        // }
-        coinsEarnedText.text = $"{playerCoin}";
 
         hintsText.text = $"{itemManager?.HintCount ?? 0}";
         autoCompleteText.text=$"{itemManager?.AutoCompleteCount ?? 0}";
+        coinsText.text=$"{Wallet.GetAmount()}";
     }
 
     void InitializeGame() {
@@ -81,10 +67,12 @@ public class NodeController : MonoBehaviour
             Debug.LogError("No swap validator found in the scene!");
             return;
         }
-
         if (itemManager == null) {
             Debug.LogError("ItemManager not found in the scene!");
         }
+
+        Wallet.SetAmount(999); 
+        numLives = 5;
 
         allNodes = new GameObject[numNodes];
         numbersToBeSorted = new int[numNodes];
@@ -175,64 +163,26 @@ public class NodeController : MonoBehaviour
         autoCompleteText.text = $"{itemManager?.AutoCompleteCount ?? 0}";
     }
 
-    public void GameOver() {
-        Time.timeScale = 0;
-        backgroundAudioSource.Stop();
-        backgroundAudioSource.PlayOneShot(gameOverSound);
-        gameOverDialog.SetActive(true);
-        
-        if (navigationHandler != null) {
-            navigationHandler.SetButtonsInteractableExcept(null, false);
-        } else {
-            Debug.LogWarning("NavigationHandler not found in the scene!");
-        }
-    }
-
     private void CompleteGame() {
-        Time.timeScale = 0;
         int starsEarned = 0;
         if (numLives >= 5) {
             starsEarned = 3;
-            playerCoin += 100;
         }
         else if (numLives >= 3) {
             starsEarned = 2;
-            playerCoin += 60;
         }
         else if (numLives >= 1) {
             starsEarned = 1;
-            playerCoin += 30;
         }
-        PlayerPrefs.SetInt("PlayerCoin", playerCoin);
-        PlayerPrefs.Save();
+        int coinsToAdd = (starsEarned == 3) ? 100 : (starsEarned == 2) ? 60 : 30;
+        Wallet.SetAmount(Wallet.GetAmount() + coinsToAdd);
 
         backgroundAudioSource.Stop();
         backgroundAudioSource.PlayOneShot(winningSound);
-        winningDialog.SetActive(true);
-        
-        if (navigationHandler != null) {
-            navigationHandler.SetButtonsInteractableExcept(null, false);
-        } else {
-            Debug.LogWarning("NavigationHandler not found in the scene!");
-        }
 
         StartCoroutine(DisplayStarsSequence(starsEarned));
     }
 
-    public void LoadNextLevel() {
-        if (!string.IsNullOrEmpty(nextLevelSceneName)) {
-            Time.timeScale = 1;
-            SceneManager.LoadScene(nextLevelSceneName);
-        
-            if (navigationHandler != null) {
-                navigationHandler.SetButtonsInteractableExcept(null, true);
-            } else {
-                Debug.LogWarning("NavigationHandler not found in the scene!");
-            }
-        } else {
-            Debug.LogError("Next level scene name is not set!");
-        }
-    }
 
     public void UseHint() {
         if (itemManager.ConsumeHint()) {
@@ -271,7 +221,7 @@ public class NodeController : MonoBehaviour
             StartCoroutine(FlashNodeColor(node2, Color.red, 0.25f));
 
             if (numLives <= 0) {
-                GameOver();
+                gameOver.GameOverControl();
                 yield break;
             }
 
@@ -370,8 +320,9 @@ public class NodeController : MonoBehaviour
     }
 
     private IEnumerator DisplayStarsSequence(int starsEarned) {
-        int initialCoins = playerCoin - (starsEarned == 3 ? 100 : starsEarned == 2 ? 60 : 30);
-        int finalCoins = playerCoin;
+        int initialCoins = Wallet.GetAmount();
+        int coinsToAdd = (starsEarned == 3) ? 100 : (starsEarned == 2) ? 60 : 30;
+        int finalCoins = initialCoins + coinsToAdd;
 
         yield return new WaitForSecondsRealtime(0.5f);
 
@@ -423,7 +374,6 @@ public class NodeController : MonoBehaviour
     private IEnumerator UpdateCoinText(int initialCoins, int finalCoins) {
         while (initialCoins < finalCoins) {
             initialCoins++;
-            coinsEarnedText.text = $"{initialCoins}";
             yield return new WaitForSecondsRealtime(0.02f);
         }
     }

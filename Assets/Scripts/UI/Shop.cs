@@ -58,31 +58,25 @@ public class Shop : MonoBehaviour
 
 private void LoadItems()
 {
-    // Initialize gameItems list
     gameItems = new List<GameObject>();
 
-    // Add all children of 'Item Background' to the gameItems list
     foreach(Transform item in items)
     {
         gameItems.Add(item.gameObject);
     }
 
-    // Update the displayed item
     UpdateDisplayedItem();
 }
 
 private void UpdateDisplayedItem()
 {
-    // Loop through all items and only display the current one
     for(int i = 0; i < gameItems.Count; i++)
     {
         gameItems[i].SetActive(i == itemIndex);
     }
 
-    // Get the item component of the current item
     Item currentItem = gameItems[itemIndex].GetComponent<Item>();
 
-    // Update the UI with the item's details
     itemName.text = gameItems[itemIndex].name;
     itemPrice.text = currentItem.price.ToString();
 }
@@ -98,8 +92,8 @@ private void UpdateDisplayedItem()
             case "Hint":
                 itemManager.AddItem("Hint", 1);
                 break;
-            case "AutoComplete":
-                itemManager.AddItem("AutoComplete", 1);
+            case "Auto Complete":
+                itemManager.AddItem("Auto Complete", 1);
                 break;
             default:
                 Debug.LogError("Unknown item name");

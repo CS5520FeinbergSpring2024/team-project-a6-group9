@@ -6,20 +6,15 @@ public class TimerController : MonoBehaviour {
     public TextMeshProUGUI timerText;
     public float startTime; 
     public GameObject clockObject; 
+    public GameOver gameOver;
     private float timeRemaining;
     private bool timerIsActive = false;
     private bool isShaking = false;
     private NodeController nodeController;
 
     void Start() {
-        if (nodeController == null) {
-            nodeController = FindObjectOfType<NodeController>();
-        }
-
-        if (nodeController == null) {
-            Debug.LogError("NodeController not found in the scene!");
-            return;
-        }
+        nodeController = FindObjectOfType<NodeController>();
+        gameOver = FindObjectOfType<GameOver>();
         ResetTimer();
     }
 
@@ -39,10 +34,8 @@ public class TimerController : MonoBehaviour {
             } else {
                 timerIsActive = false;
                 timeRemaining = 0;
+                gameOver.GameOverControl();
                 UpdateTimerDisplay();
-                if (nodeController != null) {
-                    nodeController.GameOver();
-                }
             }
         }
     }

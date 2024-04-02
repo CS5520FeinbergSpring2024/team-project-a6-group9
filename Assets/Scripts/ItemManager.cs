@@ -12,9 +12,6 @@ public class ItemManager : MonoBehaviour {
 
     void Start() {
         nodeController = FindObjectOfType<NodeController>();
-        if (nodeController == null) {
-            Debug.LogError("NodeController not found in the scene!");
-        }
     }
 
     public bool ConsumeHint() {
@@ -35,12 +32,12 @@ public class ItemManager : MonoBehaviour {
         return false;
     }
 
-        public void AddItem(string itemName, int count) {
+    public void AddItem(string itemName, int count) {
         switch (itemName) {
             case "Hint":
                 hintCount += count;
                 break;
-            case "AutoComplete":
+            case "Auto Complete":
                 autoCompleteCount += count;
                 break;
             case "Life":

@@ -4,35 +4,37 @@ using TMPro;
 public class GameOver : MonoBehaviour
 {
     public int continuePrice;
-
     public GameObject menu;
     public TextMeshProUGUI priceText;
     public Animation notEnough;
     public LevelLoader levelLoader;
+    public AudioSource backgroundAudioSource;
+    public AudioClip gameOverSound;
     [HideInInspector]
-    public bool crashed;
+    public bool isGameOver;
 
     public static GameOver instance;
 
     private Animation anim;
+    private Pause pauseScript;
 
     void Start()
     {
         instance = this;
         anim = this.GetComponent<Animation>();
+        pauseScript = FindObjectOfType<Pause>();
         priceText.text = continuePrice.ToString();
-        crashed = false;
+        isGameOver = false;
     }
 
-    // When player crashes to obstacle.
-    public void Crashed()
+    public void GameOverControl()
     {
-        crashed = true;
+        isGameOver = true;
 
-        // Play game over window open animation.
         anim.Play("Game-Over-In");
-        // Disable game menu gameobject with all buttons.
         menu.SetActive(false);
+        backgroundAudioSource.Stop();
+        backgroundAudioSource.PlayOneShot(gameOverSound);
     }
 
     // If player selects continue button.
@@ -41,10 +43,13 @@ public class GameOver : MonoBehaviour
         // If player has enough money to continue.
         if(Wallet.GetAmount() >= continuePrice)
         {
-            // Subract continue price from player wallet.
             Wallet.SetAmount(Wallet.GetAmount() - continuePrice);
-            // Load game scene.
-            levelLoader.LoadLevel(1);
+
+            pauseScript.ResumeGame(); 
+
+            anim.Play("Window-Out");
+            menu.SetActive(true);
+            isGameOver = false;
         }
         else
         {
