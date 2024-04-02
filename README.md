@@ -22,14 +22,15 @@ Buttons - Asset LazyDay
 
 
 ## For each scene/level - adjust the following
-For easy replacement from previous UI theme: copy the entire **BubbleSort1.unity** and replace the validator in **NodeManager** to your validator; implement `GetNextSwap()` in your validator; replace scene indices as indicated below.
-    - Attach the correct validator to NodeManager
-    - `(int, int) GetNextSwap(GameObject[] nodes)` returns a pair of index for the next valid swap, used for hints and auto-complete. Return (-1, -1) indicates no swap is available.
-    - Implement `GetNextSwap()` in your `XXXSortValidator` which implements `ISwapValidator`
+For easy replacement from previous UI theme: make a copy of **BubbleSort1.unity** or **BubbleSort2.Unity (contains timer control)** and follow the steps:
 
-    Adjust the following scene indices:
-        - Pause - Window - Content - Restart Button: adjust to current scene index
-        - Game Over - Window - Content - Restart Button: adjust to current scene index
-        - Game Over Time (if exist): same as above
-        - You Win - Window - Content - Next Button: adjust to next scene index
+- Replace the correct validator to NodeManager
+- `(int, int) GetNextSwap(GameObject[] nodes)` returns a pair of index for the next valid swap, used for hints and auto-complete. Return (-1, -1) indicates no swap is available. Implement `GetNextSwap()` in your `XXXSortValidator` which implements `ISwapValidator`
 
+- Adjust the following scene indices:
+    - Pause - Window - Content - Restart Button: adjust to current scene index
+    - Game Over - Window - Content - Restart Button: adjust to current scene index
+    - Game Over Time (if exist): same as above
+    - You Win - Window - Content - Next Button: adjust to next scene index
+
+- To find scene indices, go to **File - Build Settings**, you will see the index for each scene. For example, **MainMenu** has index 0, **BubbleSort1** has index 2.
