@@ -7,7 +7,6 @@ local.properties
 
 # Log/OS Files
 *.log
-.vs/
 
 # Android Studio generated files and folders
 captures/
@@ -59,6 +58,7 @@ google-services.json
 
 # VS Code
 .vscode/
+.vs/
 
 # Thumbnails
 Thumbs.db
