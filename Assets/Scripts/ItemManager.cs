@@ -2,9 +2,11 @@ using UnityEngine;
 
 public class ItemManager : MonoBehaviour {
     private int hintCount = 15;
-    private int autoCompleteCount = 1;
+    private int autoCompleteCount = 2;
+    private int lifeCount = 5;
     public int HintCount => hintCount;
     public int AutoCompleteCount => autoCompleteCount;
+    public int LifeCount => lifeCount;
 
     private NodeController nodeController;
 
@@ -40,6 +42,9 @@ public class ItemManager : MonoBehaviour {
                 break;
             case "AutoComplete":
                 autoCompleteCount += count;
+                break;
+            case "Life":
+                lifeCount += count;
                 break;
             default:
                 Debug.LogError("Unknown item name");

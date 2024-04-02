@@ -162,16 +162,16 @@ public class NodeController : MonoBehaviour
         }
     }
 
-    private void UpdateLives() {
+    public void UpdateLives() {
         livesText.text = $"{numLives}";
         StartCoroutine(PulseHeartEffect());
     }
 
-    private void UpdateHintCountUI() {
+    public void UpdateHintCountUI() {
         hintsText.text = $"{itemManager?.HintCount ?? 0}";
     }
     
-    private void UpdateCompleteCountUI() {
+    public void UpdateCompleteCountUI() {
         autoCompleteText.text = $"{itemManager?.AutoCompleteCount ?? 0}";
     }
 

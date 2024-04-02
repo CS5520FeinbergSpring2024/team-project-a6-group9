@@ -6,21 +6,16 @@ using System.Collections;
 
 public class NavigationHandler : MonoBehaviour
 {
-    public GameObject settingsMenu;
     public GameObject shopMenu;
     public GameObject confirmationDialogHome;
     public GameObject confirmationDialogBack;
-    public GameObject confirmationDialogRestart;
 
     public GameObject pauseButton;
     public GameObject playButton;
-    public GameObject soundOnButton;
-    public GameObject soundOffButton;
     public GameObject backButton;
     public GameObject homeButton;
     public GameObject settingButton;
     public GameObject shopButton;
-    public GameObject restartButton;
     public AudioSource backgroundMusic;
     public AudioSource uiAudioSource;
     public AudioClip buttonSound;
@@ -29,37 +24,19 @@ public class NavigationHandler : MonoBehaviour
     private AudioClip mainMusicClip;
     private bool playButtonSound = true;
     
-    
 
-    void Start()
-    {
-        if (backgroundMusic.isPlaying)
-        {
-            mainMusicClip = backgroundMusic.clip;
-            soundOffButton.SetActive(true);
-            soundOnButton.SetActive(false);
-        }
-
-        pauseButton.SetActive(true);
-        playButton.SetActive(false);
+    public void SetButtonsInteractableExcept(GameObject exceptionButton, bool interactable) {
+        SetButtonInteractable(playButton, playButton == exceptionButton || interactable);
+        SetButtonInteractable(settingButton, settingButton == exceptionButton || interactable);
+        SetButtonInteractable(shopButton, shopButton == exceptionButton || interactable);
+        SetButtonInteractable(backButton, backButton == exceptionButton || interactable);
+        SetButtonInteractable(homeButton, homeButton == exceptionButton || interactable);
     }
 
     public void SetButtonInteractable(GameObject button, bool interactable)
     {
         if (button.GetComponent<Button>() != null)
             button.GetComponent<Button>().interactable = interactable;
-    }
-
-    public void SetButtonsInteractableExcept(GameObject exceptionButton, bool interactable) {
-        SetButtonInteractable(pauseButton, pauseButton == exceptionButton || interactable);
-        SetButtonInteractable(playButton, playButton == exceptionButton || interactable);
-        SetButtonInteractable(soundOnButton, soundOnButton == exceptionButton || interactable);
-        SetButtonInteractable(soundOffButton, soundOffButton == exceptionButton || interactable);
-        SetButtonInteractable(settingButton, settingButton == exceptionButton || interactable);
-        SetButtonInteractable(shopButton, shopButton == exceptionButton || interactable);
-        SetButtonInteractable(backButton, backButton == exceptionButton || interactable);
-        SetButtonInteractable(homeButton, homeButton == exceptionButton || interactable);
-        SetButtonInteractable(restartButton, restartButton == exceptionButton || interactable);
     }
 
     public void PlayButtonSound()
@@ -87,51 +64,7 @@ public class NavigationHandler : MonoBehaviour
             backgroundMusic.Play();
         }
     }
-
-    public void PauseGameButton()
-    {
-        PauseGame();
-        pauseButton.SetActive(false);
-        playButton.SetActive(true);
-    }
-
-    public void UnpauseGameButton()
-    {
-        UnpauseGame();
-        pauseButton.SetActive(true);
-        playButton.SetActive(false);
-    }
-
-
-    public void PauseSound()
-    {
-        if (backgroundMusic != null && backgroundMusic.isPlaying)
-        {
-            backgroundMusic.Pause();
-        }
-        soundOnButton.SetActive(true);
-        soundOffButton.SetActive(false);
-    }
-
-    public void UnpauseSound()
-    {
-        if (backgroundMusic != null && !backgroundMusic.isPlaying)
-        {
-            backgroundMusic.Play();
-        }
-        soundOnButton.SetActive(false);
-        soundOffButton.SetActive(true);
-    }
-
-    public void ToggleSettings()
-    {
-        bool isActive = !settingsMenu.activeSelf;
-        settingsMenu.SetActive(isActive);
-        SetButtonsInteractableExcept(settingButton, !isActive);
-        if (isActive) PauseGame();
-        else UnpauseGame();
-    }
-
+    
     public void ToggleShop()
     {
         bool isActive = !shopMenu.activeSelf;
@@ -213,34 +146,6 @@ public class NavigationHandler : MonoBehaviour
         SetButtonsInteractableExcept(null, true);
     }
 
-    public void RequestRestart()
-    {
-        if (!confirmationDialogRestart.activeSelf)
-        {
-            confirmationDialogRestart.SetActive(true);
-            PauseGame();
-            SetButtonsInteractableExcept(restartButton, false);
-        }
-        else
-        {
-            StartCoroutine(ShakeGameObject(confirmationDialogRestart, 0.5f, 10f));
-        }
-    }
-
-    public void ConfirmRestart()
-    {
-        UnpauseGame();
-        SceneManager.LoadScene(SceneManager.GetActiveScene().name);
-    }
-
-    public void CancelRestart()
-    {
-        confirmationDialogRestart.SetActive(false);
-        UnpauseGame();
-        SetButtonsInteractableExcept(null, true);
-    }
-
-    
 
     IEnumerator ShakeGameObject(GameObject obj, float duration, float magnitude)
     {
