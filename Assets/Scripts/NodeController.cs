@@ -1,6 +1,4 @@
 using System.Collections;
-using System.Collections.Generic;
-using UnityEngine.SceneManagement;
 using UnityEngine;
 using TMPro;
 
@@ -20,15 +18,11 @@ public class NodeController : MonoBehaviour
     public GameObject heartIcon;
     public GameObject hintIcon;
     public GameObject autoCompleteIcon;
-    public GameObject StarFilled1;
-    public GameObject StarFilled2;
-    public GameObject StarFilled3;
     public ISwapValidator swapValidator;
     public int numNodes;
-    [HideInInspector]
-    public ItemManager itemManager;
-    [HideInInspector]
-    public GameOver gameOver;
+    private ItemManager itemManager;
+    private GameOver gameOver;
+    private YouWin youWin;
 
     private AudioSource audioSource;
     private GameObject[] allNodes;
@@ -45,6 +39,7 @@ public class NodeController : MonoBehaviour
         itemManager = FindObjectOfType<ItemManager>();
         swapValidator = GetComponent<ISwapValidator>();
         gameOver = FindObjectOfType<GameOver>();
+        youWin = FindObjectOfType<YouWin>();
 
         InitializeGame();
 
@@ -61,16 +56,8 @@ public class NodeController : MonoBehaviour
     }
 
     void InitializeGame() {
-        if (swapValidator == null) {
-            swapValidator = FindObjectOfType(typeof(ISwapValidator)) as ISwapValidator;
-        }
-        if (swapValidator == null) {
-            Debug.LogError("No swap validator found in the scene!");
-            return;
-        }
-        if (itemManager == null) {
-            Debug.LogError("ItemManager not found in the scene!");
-        }
+        swapValidator ??= FindObjectOfType(typeof(ISwapValidator)) as ISwapValidator;
+
 
         Wallet.SetAmount(999); 
 
@@ -184,27 +171,6 @@ public class NodeController : MonoBehaviour
         StartCoroutine(PulseEffect(autoCompleteIcon, 1.2f, 0.1f));
     }
 
-    private void CompleteGame() {
-        int starsEarned = 0;
-        if (itemManager.LifeCount >= 5) {
-            starsEarned = 3;
-        }
-        else if (itemManager.LifeCount >= 3) {
-            starsEarned = 2;
-        }
-        else if (itemManager.LifeCount >= 1) {
-            starsEarned = 1;
-        }
-        int coinsToAdd = (starsEarned == 3) ? 100 : (starsEarned == 2) ? 60 : 30;
-        Wallet.SetAmount(Wallet.GetAmount() + coinsToAdd);
-
-        backgroundAudioSource.Stop();
-        backgroundAudioSource.PlayOneShot(winningSound);
-
-        StartCoroutine(DisplayStarsSequence(starsEarned));
-    }
-
-
     public void UseHint() {
         if (itemManager.ConsumeHint()) {
             var swapPair = swapValidator.GetNextSwap(allNodes);
@@ -264,7 +230,7 @@ public class NodeController : MonoBehaviour
         }
 
         if (IsArraySorted()) {
-            CompleteGame();
+            youWin.CompleteGame();
             yield break;
         }
 
@@ -306,7 +272,7 @@ public class NodeController : MonoBehaviour
         node.GetComponentInChildren<SpriteRenderer>().color = originalColor;
     }
 
-    private IEnumerator PulseEffect(GameObject target, float maxScale, float pulseDuration) {
+    public IEnumerator PulseEffect(GameObject target, float maxScale, float pulseDuration) {
     Transform targetTransform = target.transform;
     Vector3 originalScale = targetTransform.localScale;
     Vector3 targetScale = originalScale * maxScale;
@@ -327,45 +293,6 @@ public class NodeController : MonoBehaviour
 
     targetTransform.localScale = originalScale;
 }
-
-
-    private IEnumerator DisplayStarsSequence(int starsEarned) {
-        int initialCoins = Wallet.GetAmount();
-        int coinsToAdd = (starsEarned == 3) ? 100 : (starsEarned == 2) ? 60 : 30;
-        int finalCoins = initialCoins + coinsToAdd;
-
-        yield return new WaitForSecondsRealtime(0.5f);
-
-        if (starsEarned >= 1) {
-            StarFilled1.SetActive(true);
-            StartCoroutine(PulseEffect(StarFilled1, 1.5f, 1.0f));
-            audioSource.PlayOneShot(starSound);
-            yield return new WaitForSecondsRealtime(1.0f);
-        }
-
-        if (starsEarned >= 2) {
-            StarFilled2.SetActive(true);
-            StartCoroutine(PulseEffect(StarFilled2, 1.5f, 1.0f));
-            audioSource.PlayOneShot(starSound);
-            yield return new WaitForSecondsRealtime(1.0f);
-        }
-
-        if (starsEarned >= 3) {
-            StarFilled3.SetActive(true);
-            StartCoroutine(PulseEffect(StarFilled3, 1.5f, 1.0f));
-            audioSource.PlayOneShot(starSound);
-            yield return new WaitForSecondsRealtime(1.0f);
-        }
-
-        StartCoroutine(UpdateCoinText(initialCoins, finalCoins));
-    }
-
-    private IEnumerator UpdateCoinText(int initialCoins, int finalCoins) {
-        while (initialCoins < finalCoins) {
-            initialCoins++;
-            yield return new WaitForSecondsRealtime(0.02f);
-        }
-    }
 
     private IEnumerator AutoCompleteSort() {
         while (!IsArraySorted()) {

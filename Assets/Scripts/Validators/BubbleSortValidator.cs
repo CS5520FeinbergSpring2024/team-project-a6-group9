@@ -42,15 +42,7 @@ public class BubbleSortValidator : MonoBehaviour, ISwapValidator {
                 sortedBoundary--;
                 lastSwapIndex = -1;
                 return true;
-            } else if (lastSwapIndex == sortedBoundary - 2) {
-                sortedBoundary--;
-                lastSwapIndex = -1;
-                return true;
-            } else if (lastSwapIndex == sortedBoundary - 3) {
-                sortedBoundary--;
-                lastSwapIndex = -1;
-                return true;
-            }
+            } 
         }
         sortedBoundary--;
         lastSwapIndex = -1;

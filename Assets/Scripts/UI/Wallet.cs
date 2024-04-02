@@ -1,35 +1,68 @@
 ﻿using UnityEngine;
 using TMPro;
+using System.Collections;
 
 public class Wallet : MonoBehaviour
 {
     private static int amount;
-    private static TextMeshProUGUI walletText;
+    private static Wallet instance; 
+    private TextMeshProUGUI walletText;
+
+    void Awake()
+    {
+        if (instance == null)
+        {
+            instance = this;
+            DontDestroyOnLoad(gameObject);
+        }
+        else
+        {
+            Destroy(gameObject);
+        }
+    }
 
     void Start()
     {
         amount = PlayerPrefs.GetInt("WalletAmount", 0);
-        walletText = this.GetComponent<TextMeshProUGUI>();
-        DisplayAmount();
+        walletText = GetComponent<TextMeshProUGUI>();
+        UpdateDisplayAmount();
     }
 
-    // Get current player wallet amount.
     public static int GetAmount()
     {
         return amount;
     }
 
-    // Set player amount to custom value.
     public static void SetAmount(int amountToSet)
     {
+        instance.ChangeAmount(amountToSet);
+    }
+
+    public void ChangeAmount(int amountToSet)
+    {
+        StartCoroutine(UpdateCoinText(amount, amountToSet));
         amount = amountToSet;
-        DisplayAmount();
         PlayerPrefs.SetInt("WalletAmount", amount);
     }
 
-    // Display player amount to the screen.
-    private static void DisplayAmount()
+    private IEnumerator UpdateCoinText(int initialCoins, int finalCoins)
     {
-        walletText.text = amount.ToString();
+        while (initialCoins != finalCoins)
+        {
+            initialCoins += (initialCoins < finalCoins) ? 1 : -1;
+            if(walletText != null)
+            {
+                walletText.text = initialCoins.ToString();
+            }
+            yield return new WaitForSecondsRealtime(0.02f);
+        }
+    }
+
+    private void UpdateDisplayAmount()
+    {
+        if (walletText != null)
+        {
+            walletText.text = amount.ToString();
+        }
     }
 }

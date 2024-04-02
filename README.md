@@ -19,3 +19,9 @@ Documentation: https://docs.github.com/en/repositories/working-with-files/managi
 
 ## Project UI
 Buttons - Asset LazyDay
+
+
+## For each scene/level - adjust following
+    - Pause - Window - Content - Restart Button: adjust to current scene index
+    - Game Over - Window - Content - Restart Button: adjust to current scene index
+    - You Win - Window - Content - Next Button: adjust to next scene index
