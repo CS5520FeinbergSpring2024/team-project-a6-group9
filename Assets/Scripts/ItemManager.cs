@@ -14,12 +14,19 @@ public class ItemManager : MonoBehaviour {
         nodeController = FindObjectOfType<NodeController>();
     }
 
+    public bool ConsumeLife() {
+        if (lifeCount > 0) {
+            lifeCount--;
+            return lifeCount > 0;
+        }
+        return false;
+    }
+
     public bool ConsumeHint() {
         if (hintCount > 0) {
             hintCount--;
             return true;
         }
-        Debug.Log("No hints left!");
         return false;
     }
 
@@ -28,7 +35,6 @@ public class ItemManager : MonoBehaviour {
             autoCompleteCount--;
             return true;
         }
-        Debug.Log("No auto-complete left!");
         return false;
     }
 

@@ -16,13 +16,15 @@ public class GameOver : MonoBehaviour
     public static GameOver instance;
 
     private Animation anim;
-    private Pause pauseScript;
+    private NodeController nodeController;
+    private ItemManager itemManager;
 
     void Start()
     {
         instance = this;
         anim = this.GetComponent<Animation>();
-        pauseScript = FindObjectOfType<Pause>();
+        nodeController = FindObjectOfType<NodeController>();
+        itemManager = FindObjectOfType<ItemManager>();
         priceText.text = continuePrice.ToString();
         isGameOver = false;
     }
@@ -31,7 +33,7 @@ public class GameOver : MonoBehaviour
     {
         isGameOver = true;
 
-        anim.Play("Game-Over-In");
+        anim.Play("Window-In");
         menu.SetActive(false);
         backgroundAudioSource.Stop();
         backgroundAudioSource.PlayOneShot(gameOverSound);
@@ -45,11 +47,15 @@ public class GameOver : MonoBehaviour
         {
             Wallet.SetAmount(Wallet.GetAmount() - continuePrice);
 
-            pauseScript.ResumeGame(); 
-
             anim.Play("Window-Out");
-            menu.SetActive(true);
+            
             isGameOver = false;
+            itemManager.AddItem("Life", 1);
+            nodeController.UpdateLifeCountUI();
+            backgroundAudioSource.Stop();
+            backgroundAudioSource.Play();
+            menu.SetActive(true);
+            nodeController.ResumeGame();
         }
         else
         {

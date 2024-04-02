@@ -16,6 +16,7 @@ public class Pause : MonoBehaviour
     public void PauseGame()
     {
         animationController.OpenWindow();
+
         #if UNITY_ANDROID
             paused = true;
         #endif

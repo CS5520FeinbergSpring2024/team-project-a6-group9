@@ -21,7 +21,6 @@ public class Shop : MonoBehaviour
         itemManager = FindObjectOfType<ItemManager>();
         nodeController = FindObjectOfType<NodeController>();
         LoadItems();
-        UpdateUI();
     }
 
     public void Previous()
@@ -88,28 +87,19 @@ private void UpdateDisplayedItem()
         {
             case "Life":
                 itemManager.AddItem("Life", 1);
+                nodeController.UpdateLifeCountUI();
                 break;
             case "Hint":
                 itemManager.AddItem("Hint", 1);
+                nodeController.UpdateHintCountUI();
                 break;
             case "Auto Complete":
                 itemManager.AddItem("Auto Complete", 1);
+                nodeController.UpdateCompleteCountUI();
                 break;
             default:
                 Debug.LogError("Unknown item name");
                 break;
         }
-
-        UpdateUI();
-    }
-
-    private void UpdateUI()
-    {
-        if (nodeController != null) {
-            nodeController.UpdateLives();
-            nodeController.UpdateHintCountUI();
-            nodeController.UpdateCompleteCountUI();
-        }
     }
 }
-

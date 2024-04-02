@@ -18,6 +18,8 @@ public class NodeController : MonoBehaviour
     public TextMeshProUGUI coinsText;
     public GameObject nodePrefab;
     public GameObject heartIcon;
+    public GameObject hintIcon;
+    public GameObject autoCompleteIcon;
     public GameObject StarFilled1;
     public GameObject StarFilled2;
     public GameObject StarFilled3;
@@ -29,7 +31,6 @@ public class NodeController : MonoBehaviour
     public GameOver gameOver;
 
     private AudioSource audioSource;
-    private int numLives;
     private GameObject[] allNodes;
     private int[] numbersToBeSorted;
     private GameObject selectedNode;
@@ -52,7 +53,7 @@ public class NodeController : MonoBehaviour
             InitializeGame();
         }
 
-        livesText.text = $"{numLives}";
+        livesText.text = $"{itemManager.LifeCount}";
 
         hintsText.text = $"{itemManager?.HintCount ?? 0}";
         autoCompleteText.text=$"{itemManager?.AutoCompleteCount ?? 0}";
@@ -72,7 +73,6 @@ public class NodeController : MonoBehaviour
         }
 
         Wallet.SetAmount(999); 
-        numLives = 5;
 
         allNodes = new GameObject[numNodes];
         numbersToBeSorted = new int[numNodes];
@@ -150,28 +150,49 @@ public class NodeController : MonoBehaviour
         }
     }
 
-    public void UpdateLives() {
-        livesText.text = $"{numLives}";
-        StartCoroutine(PulseHeartEffect());
+    public void ResetSelectedNode() {
+        if (selectedNode != null) {
+            selectedNode.transform.localScale /= 1.2f;
+            selectedNode = null;
+        }
+    }
+
+    public void ResumeGame() {
+        isSwapping = false;
+        ResetSelectedNode();
+    }
+
+    public void ConsumeLife() {
+        if (!itemManager.ConsumeLife()) {
+            gameOver.GameOverControl();
+        }
+        UpdateLifeCountUI();
+    }
+
+    public void UpdateLifeCountUI() {
+        livesText.text = $"{itemManager.LifeCount}";
+        StartCoroutine(PulseEffect(heartIcon, 1.2f, 0.1f));
     }
 
     public void UpdateHintCountUI() {
         hintsText.text = $"{itemManager?.HintCount ?? 0}";
+        StartCoroutine(PulseEffect(hintIcon, 1.2f, 0.1f));
     }
     
     public void UpdateCompleteCountUI() {
         autoCompleteText.text = $"{itemManager?.AutoCompleteCount ?? 0}";
+        StartCoroutine(PulseEffect(autoCompleteIcon, 1.2f, 0.1f));
     }
 
     private void CompleteGame() {
         int starsEarned = 0;
-        if (numLives >= 5) {
+        if (itemManager.LifeCount >= 5) {
             starsEarned = 3;
         }
-        else if (numLives >= 3) {
+        else if (itemManager.LifeCount >= 3) {
             starsEarned = 2;
         }
-        else if (numLives >= 1) {
+        else if (itemManager.LifeCount >= 1) {
             starsEarned = 1;
         }
         int coinsToAdd = (starsEarned == 3) ? 100 : (starsEarned == 2) ? 60 : 30;
@@ -214,21 +235,15 @@ public class NodeController : MonoBehaviour
         int node2Index = System.Array.IndexOf(allNodes, node2);
 
         if (!swapValidator.IsValidSwap(allNodes, node1Index, node2Index, startIndex)) {
-            numLives--;
-            UpdateLives();
             audioSource.PlayOneShot(incorrectSound);
             StartCoroutine(FlashNodeColor(node1, Color.red, 0.25f));
             StartCoroutine(FlashNodeColor(node2, Color.red, 0.25f));
-
-            if (numLives <= 0) {
-                gameOver.GameOverControl();
-                yield break;
-            }
 
             if (selectedNode != null) {
                 selectedNode.transform.localScale /= 1.2f;
                 selectedNode = null;
             }
+            ConsumeLife();
         } else {
             StartCoroutine(MoveToPosition(node1.transform, snapPositions[node2Index], 0.25f));
             StartCoroutine(MoveToPosition(node2.transform, snapPositions[node1Index], 0.25f));
@@ -291,33 +306,28 @@ public class NodeController : MonoBehaviour
         node.GetComponentInChildren<SpriteRenderer>().color = originalColor;
     }
 
-    private IEnumerator PulseHeartEffect() {
-        Transform heartTransform = heartIcon.transform;
+    private IEnumerator PulseEffect(GameObject target, float maxScale, float pulseDuration) {
+    Transform targetTransform = target.transform;
+    Vector3 originalScale = targetTransform.localScale;
+    Vector3 targetScale = originalScale * maxScale;
 
-        float timeToScale = 0.1f;
-        float maxScale = 1.5f;
-        float timer = 0;
-
-        while (timer <= timeToScale) {
-            timer += Time.deltaTime;
-            float scale = Mathf.Lerp(1.0f, maxScale, timer / timeToScale);
-            heartTransform.localScale = new Vector3(scale, scale, 1);
-            livesText.transform.localScale = new Vector3(scale, scale, 1);
-            yield return null;
-        }
-
-        timer = 0;
-        while (timer <= timeToScale) {
-            timer += Time.deltaTime;
-            float scale = Mathf.Lerp(maxScale, 1.0f, timer / timeToScale);
-            heartTransform.localScale = new Vector3(scale, scale, 1);
-            livesText.transform.localScale = new Vector3(scale, scale, 1);
-            yield return null;
-        }
-
-        heartTransform.localScale = Vector3.one;
-        livesText.transform.localScale = Vector3.one;
+    float timer = 0;
+    while (timer <= pulseDuration / 2) {
+        timer += Time.deltaTime;
+        targetTransform.localScale = Vector3.Lerp(originalScale, targetScale, timer / (pulseDuration / 2));
+        yield return null;
     }
+
+    timer = 0;
+    while (timer <= pulseDuration / 2) {
+        timer += Time.deltaTime;
+        targetTransform.localScale = Vector3.Lerp(targetScale, originalScale, timer / (pulseDuration / 2));
+        yield return null;
+    }
+
+    targetTransform.localScale = originalScale;
+}
+
 
     private IEnumerator DisplayStarsSequence(int starsEarned) {
         int initialCoins = Wallet.GetAmount();
@@ -328,47 +338,26 @@ public class NodeController : MonoBehaviour
 
         if (starsEarned >= 1) {
             StarFilled1.SetActive(true);
-            StartCoroutine(PulseStar(StarFilled1));
+            StartCoroutine(PulseEffect(StarFilled1, 1.5f, 1.0f));
             audioSource.PlayOneShot(starSound);
             yield return new WaitForSecondsRealtime(1.0f);
         }
 
         if (starsEarned >= 2) {
             StarFilled2.SetActive(true);
-            StartCoroutine(PulseStar(StarFilled2));
+            StartCoroutine(PulseEffect(StarFilled2, 1.5f, 1.0f));
             audioSource.PlayOneShot(starSound);
             yield return new WaitForSecondsRealtime(1.0f);
         }
 
         if (starsEarned >= 3) {
             StarFilled3.SetActive(true);
-            StartCoroutine(PulseStar(StarFilled3));
+            StartCoroutine(PulseEffect(StarFilled3, 1.5f, 1.0f));
             audioSource.PlayOneShot(starSound);
             yield return new WaitForSecondsRealtime(1.0f);
         }
 
         StartCoroutine(UpdateCoinText(initialCoins, finalCoins));
-    }
-
-    private IEnumerator PulseStar(GameObject star) {
-        float pulseDuration = 1.0f;
-        Vector3 originalScale = star.transform.localScale;
-        Vector3 targetScale = originalScale * 1.5f;
-
-        float timer = 0;
-        while (timer <= pulseDuration / 2) {
-            timer += Time.unscaledDeltaTime;
-            star.transform.localScale = Vector3.Lerp(originalScale, targetScale, timer / (pulseDuration / 2));
-            yield return null;
-        }
-        timer = 0;
-        while (timer <= pulseDuration / 2) {
-            timer += Time.unscaledDeltaTime;
-            star.transform.localScale = Vector3.Lerp(targetScale, originalScale, timer / (pulseDuration / 2));
-            yield return null;
-        }
-
-        star.transform.localScale = originalScale;
     }
 
     private IEnumerator UpdateCoinText(int initialCoins, int finalCoins) {
