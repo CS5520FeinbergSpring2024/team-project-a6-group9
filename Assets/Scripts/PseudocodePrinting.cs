@@ -1,5 +1,4 @@
 using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 using TMPro;
 
@@ -8,9 +7,11 @@ public class PseudocodePrinting : MonoBehaviour
     public TextMeshProUGUI pseudocodeText;
     public string[] pseudocodeLines;
     public float characterDisplayDelay = 0.02f;
+    private NodeController nodeController;
 
     void Start()
     {
+        nodeController = FindObjectOfType<NodeController>();
         StartCoroutine(DisplayPseudocode());
     }
 
@@ -22,6 +23,10 @@ public class PseudocodePrinting : MonoBehaviour
             int i = 0;
             while (i < line.Length)
             {
+                while (nodeController.isGamePaused)
+                {
+                    yield return null; 
+                }
                 if (line[i] == '<')
                 {
                     int tagClose = line.IndexOf('>', i);
